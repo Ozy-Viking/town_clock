@@ -1,15 +1,20 @@
 import time
 import os
 import pandas as pd
-import random
 # import asyncio
 
 
 class ClockTime:
+    """Main Class
+    TODO: work out the actual effect or rounding. 
+    
+    """
+    
     def __init__(self):
         self.current_time = time.localtime()
         self.epoch_secs = time.time()
         self.diff = 0
+        self.current_clocktime = time.time()
         self.full_path = self._get_or_create_output_folder()
         self.current_clocktime = self._get_last_time_from_file() # In epoch seconds
         if self._time_diff(): self.change_time()
@@ -26,7 +31,7 @@ class ClockTime:
             os.mkdir(folder_path)
         if not os.path.exists(full_path):
             print(f'Creating new file at {full_path}')
-            skeleton = pd.DataFrame(self._df_structure()) #TODO: add support for tracking time errors.
+            skeleton = pd.DataFrame(self._df_structure())
             skeleton.to_csv(full_path, index=False)
         return full_path
     
@@ -34,7 +39,6 @@ class ClockTime:
         data = pd.read_csv(self.full_path)
         try:
             clock_time = data.loc[data.shape[0]-1,'Epoch']
-            print(clock_time)
             return clock_time
         except Exception as e:
             print('failed to access time from csv')
@@ -42,13 +46,13 @@ class ClockTime:
             return time.time()
     
     def _df_structure(self):
-        ctime = self.current_time
-        return {'String':[time.asctime(ctime)], 'Epoch': self.epoch_secs, 
-                'Time':[ctime], 'Difference':[self.diff], 'DST':[ctime.tm_isdst]}
+        ctime = self.current_clocktime
+        return {'Current_Epoch': self.epoch_secs, 'Clocktime':[time.asctime(time.localtime(ctime))], 
+                'Epoch': self.epoch_secs, 'Time':ctime, 
+                'Difference':[self.diff], 'DST':[time.localtime(ctime).tm_isdst]}
         
     def save_time(self):
         df = pd.DataFrame(self._df_structure())
-        # df = df.append(pd.read_csv(self.full_path,index_col='ID'), ignore_index=True)
         df.to_csv(self.full_path, mode='a', index=False, header=False)
     
     # ----- main function --------
@@ -60,11 +64,10 @@ class ClockTime:
         self.diff = self._diff_time(self.gps_time) # Assumption that this will occur close to the minute.
         self.save_time()
         if not (self.diff == 0): 
-            print('change clock')
             self.change_time()   
         
     def current_time_on_clock(self, time):
-        _diff_time
+        self._diff_time(time)
         self.current_clocktime = time
     
     def _time_diff(self):
@@ -80,16 +83,12 @@ class ClockTime:
         return False
 
     def _diff_time(self, time):
-        
         self.diff_secs = self.current_clocktime - time
         self.diff = round(self.diff_secs/60)
-        print(self.diff) 
-        while self.diff <= -720: # adds 12 hours
+        while self.diff <= -720: # adds 12 hours for long off periods (date doesn't matter)
             self.diff_secs += 43200
             self.diff += 720
             self.current_clocktime += 43200
-            self.epoch_secs += 43200
-        print(self.diff) 
     
     def _gps_time_fetch(self, clock='town'):
         """GPS Time
@@ -99,31 +98,29 @@ class ClockTime:
         if clock == 'town':
             self.gps_time = time.time()
         elif clock == 'sys':
-            diff = time.time() - time.time() # + (random.randint(-1, 1)*60)
-            if diff:
-                return True
-            return False
+            diff = time.time() - time.time()
+            return bool(diff)
         
     def pulse(self):
-        self.current_clocktime += 60 # TODO: set to 60 seconds when done.
+        self.current_clocktime += 60
         ct = self.current_clocktime
-        print(f'Pulse: {time.asctime(time.localtime(ct))} Epoch:{ct} Actual: {time.asctime()}')
+        print(f'Pulse: {time.asctime(time.localtime(ct))} Clocktime(secs):{ct} Actual: {time.asctime()}\n')
+        self.save_time()
 
     def change_time(self):
-        print(self.diff)
-        if self.diff > 0:       # Fast
+        if not self.diff: pass 
+        elif self.diff > 0:       # Fast
             print("fast")
             self.fast()
         elif self.diff < 0:     # Slow
             print("slow")
             self.slow()
         self.diff = 0
-        print('Check system time')
         self.check_system_time()
     
     def check_system_time(self):
         if self._gps_time_fetch('sys'):
-            print(f' System time now: {time.asctime()}')
+            print(f'System time now: {time.asctime()}')
             self.gps_diff = 0
     
     def fast(self):
@@ -132,7 +129,6 @@ class ClockTime:
     
     def slow(self):
         print(f'Pulse: {abs(self.diff)} times')
-        
         for _ in range(abs(self.diff)):
             self.pulse()
             # pulse()
