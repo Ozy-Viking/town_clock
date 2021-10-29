@@ -1,0 +1,7 @@
+String,Epoch,Time,Difference,DST
+Fri Oct 29 16:13:43 2021,1635484423.9840326,"time.struct_time(tm_year=2021, tm_mon=10, tm_mday=29, tm_hour=16, tm_min=13, tm_sec=43, tm_wday=4, tm_yday=302, tm_isdst=1)",0,1
+Fri Oct 29 16:14:00 2021,1635484440.0094967,"time.struct_time(tm_year=2021, tm_mon=10, tm_mday=29, tm_hour=16, tm_min=14, tm_sec=0, tm_wday=4, tm_yday=302, tm_isdst=1)",,1
+Fri Oct 29 16:40:00 2021,1635486000.0104554,"time.struct_time(tm_year=2021, tm_mon=10, tm_mday=29, tm_hour=16, tm_min=40, tm_sec=0, tm_wday=4, tm_yday=302, tm_isdst=1)",,1
+Fri Oct 29 16:41:00 2021,1635486060.0108042,"time.struct_time(tm_year=2021, tm_mon=10, tm_mday=29, tm_hour=16, tm_min=41, tm_sec=0, tm_wday=4, tm_yday=302, tm_isdst=1)",,1
+Fri Oct 29 16:42:00 2021,1635486120.0148273,"time.struct_time(tm_year=2021, tm_mon=10, tm_mday=29, tm_hour=16, tm_min=42, tm_sec=0, tm_wday=4, tm_yday=302, tm_isdst=1)",,1
+Fri Oct 29 16:43:00 2021,1635486180.000353,"time.struct_time(tm_year=2021, tm_mon=10, tm_mday=29, tm_hour=16, tm_min=43, tm_sec=0, tm_wday=4, tm_yday=302, tm_isdst=1)",,1
