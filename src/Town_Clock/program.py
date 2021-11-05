@@ -1,26 +1,24 @@
 import time
 import os
 import pandas as pd
+from collections import namedtuple
 # import asyncio
+from Town_Clock.Relay import ClockPulse
+from Town_Clock.GPS import set_system_time
 
 
-class ClockTime:
-    """Main Class
-    TODO: work out the actual effect or rounding. 
-    
-    """
-    
-    def __init__(self):
+class ClockTime:    
+    def __init__(self) -> None:
         self.current_time = time.localtime()
-        self.epoch_secs = time.time()
+        self.current_epoch_secs = time.time()
         self.diff = 0
-        self.current_clocktime = time.time()
         self.full_path = self._get_or_create_output_folder()
         self.current_clocktime = self._get_last_time_from_file() # In epoch seconds
+        self.ensure_stored_clocktime_is_rounded(self.current_clocktime)
         if self._time_diff(): self.change_time()
-    
+
     # Log Storage
-    def _get_or_create_output_folder(self):
+    def _get_or_create_output_folder(self) -> str:
         folder = 'clock_log'
         name = 'log'
         base_folder = os.path.dirname(__file__)
@@ -31,47 +29,50 @@ class ClockTime:
             os.mkdir(folder_path)
         if not os.path.exists(full_path):
             print(f'Creating new file at {full_path}')
+            self.current_clocktime = time.time()
             skeleton = pd.DataFrame(self._df_structure())
             skeleton.to_csv(full_path, index=False)
         return full_path
-    
-    def _get_last_time_from_file(self):
+
+    def _get_last_time_from_file(self) -> float:
         data = pd.read_csv(self.full_path)
         try:
-            clock_time = data.loc[data.shape[0]-1,'Epoch']
+            clock_time = data.tail(1).get('Epoch').iat[0]
             return clock_time
         except Exception as e:
             print('failed to access time from csv')
             print(e)
             return time.time()
-    
-    def _df_structure(self):
-        ctime = self.current_clocktime
-        return {'Current_Epoch': self.epoch_secs, 'Clocktime':[time.asctime(time.localtime(ctime))], 
-                'Epoch': self.epoch_secs, 'Time':ctime, 
-                'Difference':[self.diff], 'DST':[time.localtime(ctime).tm_isdst]}
+
+    def _df_structure(self) -> dict:
+        ctime = self.current_time
+        return {'String':[time.asctime(ctime)], 'Epoch': self.current_clocktime,
+                'Error':self.current_epoch_secs%60, 'Time':[ctime],
+                'Difference':[self.diff], 'DST':[ctime.tm_isdst]}
         
-    def save_time(self):
+    def save_time(self) -> None:
         df = pd.DataFrame(self._df_structure())
+        # df = df.append(pd.read_csv(self.full_path,index_col='ID'), ignore_index=True)
         df.to_csv(self.full_path, mode='a', index=False, header=False)
     
     # ----- main function --------
-    def store_current_time(self, time, secs):
-        self._gps_time_fetch()
+    def store_current_time(self, time: time.struct_time, secs: float) -> None:
+        # use system time then set system time to gps time during the minute.
         self.diff = 0
-        self.current_time = time
-        self.epoch_secs = secs
-        self.diff = self._diff_time(self.gps_time) # Assumption that this will occur close to the minute.
-        self.save_time()
-        if not (self.diff == 0): 
+        self.current_time = time # time.localtime()
+        self.current_epoch_secs = secs # time.time()
+        self.diff = self._diff_time(self.current_epoch_secs) 
+        if self.diff: 
+            print('Change the clock')
             self.change_time()   
+        self.save_time()
         
-    def current_time_on_clock(self, time):
-        self._diff_time(time)
+    def set_current_time_on_clock(self, time: float) -> None:
+        # TODO: move all clocktimes here
         self.current_clocktime = time
     
-    def _time_diff(self):
-        # Compare current time to last time.
+    def _time_diff(self) -> bool:
+        # Compare current time to last time. TODO: GPS Time?
         self._gps_time_fetch()
         if self.gps_time: 
             self._diff_time(self.gps_time) 
@@ -82,62 +83,70 @@ class ClockTime:
             return True
         return False
 
-    def _diff_time(self, time):
-        self.diff_secs = self.current_clocktime - time
+    def _diff_time(self, tm: float) -> None:
+        if not tm:
+            tm=time.time()
+        self.diff_secs = self.current_clocktime - tm
         self.diff = round(self.diff_secs/60)
-        while self.diff <= -720: # adds 12 hours for long off periods (date doesn't matter)
+        while self.diff <= -720: # adds 12 hours
             self.diff_secs += 43200
             self.diff += 720
             self.current_clocktime += 43200
-    
-    def _gps_time_fetch(self, clock='town'):
-        """GPS Time
-        Currently generator error to test whether clock can adjust
-        TODO: set system time from gps time.
-        """
-        if clock == 'town':
-            self.gps_time = time.time()
-        elif clock == 'sys':
-            diff = time.time() - time.time()
-            return bool(diff)
         
-    def pulse(self):
-        self.current_clocktime += 60
+    def pulse(self) -> None:
+        relay.pulse()
+        self.current_clocktime += 60 # TODO: set to 60 seconds when done.
         ct = self.current_clocktime
-        print(f'Pulse: {time.asctime(time.localtime(ct))} Clocktime(secs):{ct} Actual: {time.asctime()}\n')
-        self.save_time()
+        print(f'Pulse: {time.asctime(time.localtime(ct))} Epoch:{self.current_epoch_secs}'
+            f' Error:{round(self.current_epoch_secs%60*1000)} ms Actual: {time.asctime()}\n')
+        self.current_clocktime = self.ensure_stored_clocktime_is_rounded(ct)
 
-    def change_time(self):
-        if not self.diff: pass 
-        elif self.diff > 0:       # Fast
+    @staticmethod
+    def ensure_stored_clocktime_is_rounded(ct: float) -> float:
+        ctmod60 = (ct % 60)
+        match ct:
+            case ct if ctmod60 < 30: ct = ct - ctmod60
+            case ct if ctmod60 >= 30: ct = ct + (60 - ctmod60)
+        return ct
+
+    def change_time(self) -> None:
+        if self.diff > 0:       # Fast
             print("fast")
             self.fast()
         elif self.diff < 0:     # Slow
             print("slow")
             self.slow()
-        self.diff = 0
+        print('Check system time')
         self.check_system_time()
     
-    def check_system_time(self):
-        if self._gps_time_fetch('sys'):
-            print(f'System time now: {time.asctime()}')
-            self.gps_diff = 0
-    
-    def fast(self):
+    def fast(self) -> None:
         print(f'Sleep for {self.diff_secs} seconds')
         time.sleep(abs(self.diff_secs))
     
-    def slow(self):
+    def slow(self) -> None:
         print(f'Pulse: {abs(self.diff)} times')
         for _ in range(abs(self.diff)):
             self.pulse()
             # pulse()
             time.sleep(1)
 
+    def check_system_time(self) -> None:
+        if self._gps_time_fetch('sys'):
+            print(f' System time now: {time.asctime()}')
+            self.gps_diff = 0
+    
+    def _gps_time_fetch(self, clock:str='town') -> bool|float:
+        """GPS Time
+        Currently generator error to test whether clock can adjust
+        TODO: set system time from gps time.
+        """
+        if clock == 'town':
+            self.gps_time = None # Simulating no gps signal.
+        elif clock == 'sys':
+            set_system_time()
 
-def main():
-    # every minute (print time) on the minute.
-    clock_time = ClockTime()
+
+def main() -> None:
     while True:
         try:
             ct0 = time.time()
@@ -153,10 +162,13 @@ def main():
             time.sleep(0.0001)
         except KeyboardInterrupt:
             print('bye...')
+            relay.destroy()
             exit(0)
         except Exception as e:
             print(e)
 
-
 if __name__ == '__main__':
+    Pins = [35, 36]
+    relay = ClockPulse(Pins)
+    clock_time = ClockTime()
     main()
