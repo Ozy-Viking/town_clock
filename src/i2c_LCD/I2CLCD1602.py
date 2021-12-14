@@ -48,7 +48,6 @@ def check_button_pressed() -> dict | bool:
 
 def press_button(button_pin: int) -> None:
     while GPIO.input(button_pin) == GPIO.LOW:
-        
         time.sleep(debounce_sleep)
 
 
@@ -96,7 +95,7 @@ def change_clock_value(clock: int, queue: Queue, event: Event, logger: Worker):
     write_to_screen_center(f'Changing Clock {clock}', f'{str(change_time_to_print(tm))} -> {change_time_to_print()}')
     event.set()
     diff = int((tm1-tm)//60)
-    queue.put(diff)
+    queue.put(clock,diff)
     logger.log('debug', f'Putting {tm = }, {tm1 = } on queue')
     logger.log('debug', f'Difference: {diff}')
     time.sleep(2)
@@ -143,7 +142,7 @@ def loop(screen_queue: Queue, input_event: Event, logger: Worker):
         if pin: last_time_button_pressed = time.time()
 
         td = time.time() - last_time_button_pressed
-        if td >= 15:                                 # Sleep after 5 min.
+        if td >= 60*5:                                 # Sleep after 5 min.
             last_time_button_pressed = go_to_sleep(logger = logger)  
 
         if int((time.time()*10)%10) == 0 or change_clock:
@@ -160,6 +159,7 @@ def destroy():
 
 
 def setup():
+    GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BOARD) # use PHYSICAL GPIO Numbering
     for pin in button_pins:
         GPIO.setup(button_pins[pin], GPIO.IN, pull_up_down=GPIO.PUD_UP) # set buttonPin to PULL UP INPUT mode
