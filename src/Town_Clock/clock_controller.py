@@ -76,7 +76,9 @@ class Controller:
                     self.clock_time.logger.log('info',f'Loop Clocktime: {self.clock_time}')
                     tp_1 = time.perf_counter()
                     self.clock_tower.check_time_accuracy(clocktime = self.clock_time, clock = CEE.Clock.ALL)
-                    self.listener.logger.log('info',f'Time Taken: {(tp_1-tp_0)*1000:.2f} ms')
+                    self.listener.logger.log('info',f'Time Taken: {(tp_1-tp_0)*1000-1000:.2f} ms')
+                    
+                    
                     
                     time.sleep(1.0001)
                     

@@ -14,8 +14,8 @@ if __name__ == '__main__':
     N = E = +1.0
     S = W = -1.0
     # Setup
-    clock_pins = 12, 16
-    led_pin = 12
+    clock_pins = 18, 22
+    led_pin = 16
     latitude, longitude = 30.3402 * S, 152.7124 * E
     altitude = 741
     
