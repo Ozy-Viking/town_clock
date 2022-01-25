@@ -2,14 +2,14 @@ import time
 from logging import exception
 from multiprocessing import Event, Process, Queue, current_process
 
-import i2c_LCD.I2CLCD1602 as LCD
-
 import Town_Clock.clock_enums_exceptions as CEE
+import Town_Clock.clock_input_screen as LCD
 import Town_Clock.clock_logging as c_log
 from Town_Clock.clock_data import ClockTime
 from Town_Clock.clock_logging import Listener, Worker, log_queue
 from Town_Clock.clock_mechanism import ClockTower
-from Town_Clock.location_sunrise_sunset import find_sunrise_sunset_times, timezone_finder
+from Town_Clock.location_sunrise_sunset import (find_sunrise_sunset_times,
+                                                timezone_finder)
 
 
 class Controller:

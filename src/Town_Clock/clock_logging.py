@@ -215,7 +215,7 @@ class Worker:
         self.clock = clock
         self.q = log_queue
     
-    def log(self, level: str | int, msg: str, name: str = None) -> None:
+    def log(self, level: int, msg: str, name: str = None) -> None:
         if name is None: name = self.name
         
         if isinstance(level, Log_Level): level = level.value
