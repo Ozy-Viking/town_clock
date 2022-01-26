@@ -5,10 +5,9 @@ from Town_Clock.clock_data import ClockTime, Diff
 from Town_Clock.relay import Clocks, LED
 from Town_Clock.clock_enums_exceptions import Mode, PulseError, Clock
 
-#TODO: intergrate relay with clock diff from screen.
 
 class ClockTower:
-    def __init__(self, clock_pins, led_pin, mode: Mode = Mode.TEST):
+    def __init__(self, clock_pins, led_pin, mode: Mode = Mode.ACTIVE):
         self.mode = mode
         self.pins = {'Clock': clock_pins, 'LED': led_pin}
         self.clock = Clocks(clock_pins = clock_pins)

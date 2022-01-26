@@ -88,8 +88,8 @@ class LED(Relay):
 
 
 if __name__ == '__main__':
-    # clock = Clocks(clock_pins = (16,12))
-    # clock.pulse(clock = Clock.TWO)
+    # clock = Clocks(clock_pins = (18, 22))
+    # clock.pulse(clock = Clock.ALL)
     # time.sleep(1)
 
     # led = LED(16)

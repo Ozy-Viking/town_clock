@@ -28,5 +28,8 @@ if __name__ == '__main__':
                      )
 
     # Main loop
-    while True:
-        con.main()
+    try:
+        while True:
+            con.main()
+    except KeyboardInterrupt:
+        destroy()

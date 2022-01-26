@@ -10,7 +10,7 @@ from Town_Clock.clock_logging import Listener, Worker, log_queue
 from Town_Clock.clock_mechanism import ClockTower
 from Town_Clock.location_sunrise_sunset import (find_sunrise_sunset_times,
                                                 timezone_finder)
-
+from Town_Clock.clock_enums_exceptions import PulseError
 
 class Controller:
     def __init__(self, clock_1_pin, clock_2_pin, led_pin, lat, long, alt) -> None:
@@ -63,7 +63,14 @@ class Controller:
         while True:
             try:
                 if self.all_events['input_event'].is_set():
-                    input_diff = self.all_queues['input_queue'].get()
+                    clock, input_diff = self.all_queues['input_queue'].get() # Tuple
+                    for _ in range(input_diff):
+                        try:
+                            self.clock_tower.clock.pulse(clock = clock)
+                        except PulseError as err:
+                            self.clock_tower.clock.pulse_log.log('error', 'FAILED PULSE')
+                            self.clock_tower.clock.clocks_log.log('error', f"PulseError: {err}")
+                    self.all_events['input_event'].clear()
 
                 tm = time.time()
                 if int(tm%self.clock_time.freq_pulse) == 0:
