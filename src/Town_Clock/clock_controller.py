@@ -104,12 +104,13 @@ class Controller:
                         self.clock_tower.logger.log('info', 'LED on')
                         self.clock_tower.led.turn_on()
                     elif tm < self.next_sunset_sunrise_times[3]:
+                        self.clock_tower.logger.log('info', 'LED off')
                         self.clock_tower.led.turn_off()
-                    elif tm >= self.next_sunset_sunrise_times[3]:
+                    elif tm >= self.next_sunset_sunrise_times[3] and tm < self.next_sunset_sunrise_times[5]:
                         self.clock_tower.logger.log('info', 'LED on')
                         self.clock_tower.led.turn_on()
                     elif tm >= self.next_sunset_sunrise_times[5]:
-                        self.clock_tower.logger.log('info', 'LED on')
+                        self.clock_tower.logger.log('info', 'LED off')
                         self.clock_tower.led.turn_off()
                         self.next_sunset_sunrise_times = find_sunrise_sunset_times(**self.position)
                         for t in self.next_sunset_sunrise_times:
