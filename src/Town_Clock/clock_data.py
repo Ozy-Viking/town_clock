@@ -76,7 +76,7 @@ class ClockTime:
         self.logger.log('debug','_get_last_time_from_file')
         try:
             data = read_csv(self.full_path, sep = ';')
-            if not data.size: return time.time()
+            if not data.size: return time.time()//60
             ct = data.tail(1).iat[0, 6]
             return int(ct)
         except Exception as e:

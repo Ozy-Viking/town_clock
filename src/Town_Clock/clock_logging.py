@@ -98,7 +98,7 @@ class Listener:
                     'class': 'logging.handlers.RotatingFileHandler',
                     'filename': f'{log_folder}/clock.log',
                     'mode': 'a',
-                    'maxBytes': 129600, 
+                    'maxBytes': 1073741824, 
                     'backupCount': 7,
                     'formatter': 'pulse'
                 },
@@ -109,12 +109,6 @@ class Listener:
                     'formatter': 'detailed',
                     'level': 'ERROR'
                 },
-                # 'pulsefile':{
-                #     'class': 'logging.FileHandler',
-                #     'filename': f'{pulse_log_path}',
-                #     'mode': 'a',
-                #     'formatter': 'pulse'
-                # },
                 'pulserotate':{
                     'class': 'logging.handlers.RotatingFileHandler',
                     'filename': f'{pulse_log_path}',
@@ -123,13 +117,6 @@ class Listener:
                     'backupCount': 7,
                     'formatter': 'pulse'
                 },
-                # 'pulserotatetime':{
-                #     'class': 'logging.handlers.TimedRotatingFileHandler',
-                #     'filename': f'{pulse_log_path}',
-                #     'when': 'm',
-                #     'backupCount': 2,
-                #     'formatter': 'pulse'
-                # }
             },
             'loggers': {
                 'Pulse': {'handlers': ['pulserotate']}

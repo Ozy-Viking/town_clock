@@ -56,6 +56,9 @@ class Controller:
         for p in self.all_processes:
             if self.all_processes[p].is_alive(): continue
             self.all_processes[p].start()
+        
+        self.input_diff = 0
+        self.active_clock = CEE.Clock.ALL
 
 
     def main(self):
@@ -63,13 +66,22 @@ class Controller:
         while True:
             try:
                 if self.all_events['input_event'].is_set():
-                    clock, input_diff = self.all_queues['input_queue'].get() # Tuple
-                    for _ in range(input_diff):
-                        try:
-                            self.clock_tower.clock.pulse(clock = clock)
-                        except PulseError as err:
-                            self.clock_tower.clock.pulse_log.log('error', 'FAILED PULSE')
-                            self.clock_tower.clock.clocks_log.log('error', f"PulseError: {err}")
+                    clk, self.input_diff = self.all_queues['input_queue'].get() # Tuple
+                    if self.input_diff > 0:
+                        for _ in range(self.input_diff):
+                            try:
+                                self.clock_tower.clock.pulse(clock = clk)
+                                time.sleep(1)
+                            except PulseError as err:
+                                self.clock_tower.clock.pulse_log.log('error', 'FAILED PULSE')
+                                self.clock_tower.clock.clocks_log.log('error', f"PulseError: {err}")
+                    elif self.input_diff < 0: 
+                        if clk == 0:
+                            self.active_clock = None
+                        elif clk == 1:
+                            self.active_clock = CEE.Clock(2)
+                        elif clk == 2:
+                            self.active_clock = CEE.Clock(1)  
                     self.all_events['input_event'].clear()
 
                 tm = time.time()
@@ -78,27 +90,38 @@ class Controller:
 
                     self.clock_time.logger.log('debug',f'{tm}')
                     self.clock_time.current_time = tm
-                    self.clock_tower.pulse(self.clock_time, clock = CEE.Clock.ALL)
+                    self.clock_tower.pulse(self.clock_time, clock = self.active_clock)
 
                     self.clock_time.logger.log('info',f'Loop Clocktime: {self.clock_time}')
                     tp_1 = time.perf_counter()
                     self.clock_tower.check_time_accuracy(clocktime = self.clock_time, clock = CEE.Clock.ALL)
                     self.listener.logger.log('info',f'Time Taken: {(tp_1-tp_0)*1000-1000:.2f} ms')
-                    
-                    
-                    
+
                     time.sleep(1.0001)
-                    
-                    # Fetching next local sunset and sunrise at midday.
-                    if not self.clock_time.local_clock_time.tm_min == 0: continue
-                    elif self.clock_time.local_clock_time.tm_hour == 12:
+
+                    # Fetching next local sunset and sunrise after dawn.
+                    if tm < self.next_sunset_sunrise_times[2]:
+                        self.clock_tower.logger.log('info', 'LED on')
+                        self.clock_tower.led.turn_on()
+                    elif tm < self.next_sunset_sunrise_times[3]:
+                        self.clock_tower.led.turn_off()
+                    elif tm >= self.next_sunset_sunrise_times[3]:
+                        self.clock_tower.logger.log('info', 'LED on')
+                        self.clock_tower.led.turn_on()
+                    elif tm >= self.next_sunset_sunrise_times[5]:
+                        self.clock_tower.logger.log('info', 'LED on')
+                        self.clock_tower.led.turn_off()
                         self.next_sunset_sunrise_times = find_sunrise_sunset_times(**self.position)
                         for t in self.next_sunset_sunrise_times:
                             self.next_sunset_sunrise_times[t] = self.clock_time.mod_freq(self.next_sunset_sunrise_times[t])
                         print(self.next_sunset_sunrise_times)
+                    
+                    if self.input_diff < 0:
+                        self.input_diff += 1
+                    elif self.input_diff == 0 and self.active_clock != CEE.Clock.ALL:
+                        self.active_clock = CEE.Clock.ALL
                 
                 time.sleep(0.009)
-
 
             except KeyboardInterrupt:
                 self.destroy()

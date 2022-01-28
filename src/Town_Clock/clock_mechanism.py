@@ -20,6 +20,8 @@ class ClockTower:
 
     def pulse(self, tm: ClockTime, clock: Clock, mode: Mode = Mode.ACTIVE) -> None:
         self.logger.log('debug','Pulse Method')
+        if clock == None:
+            return
         try:
             tm.pulsed = self.clock.pulse(clock = clock)
             tm.clock_time += tm.freq_pulse
@@ -36,15 +38,6 @@ class ClockTower:
             tm.pulsed = False
         time.sleep(1)
         tm.pulsed = False
-
-    # def input_time(self, clock: Clock) -> float:
-    #     self.logger.log('debug','Input Time Method')
-    #     # Epoch (0) Thu Jan  1 00:00:00 1970
-    #     h = int(input(f'Hour currently on clock {clock}: '))
-    #     m = int(input(f'Minute currently on clock {clock}: '))
-    #     if h > 12: h += 12
-    #     gmt = time.time()
-    #     return (gmt-gmt%(60*60*24)) + ((h)*3600 + m*60)
 
     def check_time_accuracy(self, clocktime: ClockTime, clock: Clock) -> Diff:
         self.logger.log('debug','check_time_accuracy Method')
@@ -66,7 +59,6 @@ class ClockTower:
         return 
 
     def fast(self, ct: ClockTime, clock: Clock) -> None:
-        # TODO: make 1 clock able to sleep.
         self.logger.log('info',f'Fast: Sleep for {ct.diff_secs:.2f} seconds')
         if clock == Clock.ALL:
             time.sleep(abs(ct.diff_secs))

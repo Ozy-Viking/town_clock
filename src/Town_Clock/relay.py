@@ -16,10 +16,10 @@ class Relay:
         self.relay_log = Worker(name = name, clock = clock)
         self.relay_log.log('debug', self)
         self.__setup()
+        self.turn_off()
 
     def __setup(self) -> None:
         GPIO.setwarnings(False)
-        GPIO.setmode(GPIO.BOARD)
         GPIO.setup(self.pin, GPIO.OUT)
 
     def __repr__(self):
@@ -88,12 +88,12 @@ class LED(Relay):
 
 
 if __name__ == '__main__':
-    # clock = Clocks(clock_pins = (18, 22))
-    # clock.pulse(clock = Clock.ALL)
-    # time.sleep(1)
-
-    # led = LED(16)
-    # led.turn_on()
-    # time.sleep(5)
-    # led.turn_off()
+    GPIO.setmode(GPIO.BCM)
+    clock = Clocks(clock_pins = (24, 25))
+    clock.pulse(clock = Clock.ALL)
+    time.sleep(1)
+    led = LED(22)
+    led.turn_on()
+    time.sleep(5)
+    led.turn_off()
     pass

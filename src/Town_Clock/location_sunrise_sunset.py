@@ -16,10 +16,11 @@ def find_sunrise_sunset_times(latitude, longitude, altitude) -> dict:
     # Setting up Times
     zone = timezone_finder(latitude, longitude, altitude)
     now = zone.localize(dt.datetime.now())
+    midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)
     midday = now.replace(hour=12, minute=0, second=0, microsecond=0)
     next_midday = midday + dt.timedelta(days=1)
     ts = load.timescale()
-    t0 = ts.from_datetime(midday)
+    t0 = ts.from_datetime(midnight)
     t1 = ts.from_datetime(next_midday)
 
     # Setting up Position and Function
@@ -33,13 +34,10 @@ def find_sunrise_sunset_times(latitude, longitude, altitude) -> dict:
     # Running Function
     sunset_sunrise_times = {}
     previous_e = f(t0).item()
-
+    idx = 0
     for t, e in zip(times, events):
         if not e in [3,4]: continue
-        if previous_e <= e:
-            sunset_sunrise_times[f'{almanac.TWILIGHTS[e]} starts'] = time.mktime(t.astimezone(zone).timetuple())
-        else:
-            sunset_sunrise_times[f'{almanac.TWILIGHTS[e]} ends'] = time.mktime(t.astimezone(zone).timetuple())
-        previous_e = e
+        idx += 1
+        sunset_sunrise_times[idx] = time.mktime(t.astimezone(zone).timetuple())
 
     return sunset_sunrise_times
