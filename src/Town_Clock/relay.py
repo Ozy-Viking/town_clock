@@ -45,18 +45,22 @@ class Relay:
 
 
 class Clocks:
-    def __init__(self, clock_pins, mode:Mode = Mode.TEST):
+    def __init__(self, clock_pins, common_pin, mode:Mode = Mode.TEST):
         self.mode = mode
         self.clocks = {}
         self.clock_pins = clock_pins
+        self.clocks[0] = Relay(pin = common_pin,
+                                                  name = 'Common', 
+                                                  clock = None)
         for idx, pin in enumerate(clock_pins):
-            self.clocks[f'Clock {idx+1}'] = Relay(pin = pin,
+            self.clocks[idx+1] = Relay(pin = pin,
                                                   name = f'Clock {idx+1}', 
                                                   clock = Clock(idx+1))
         self.qty_clock = len(clock_pins)
         self.pulse_log = Worker(name = 'Pulse', clock = Clock.ALL)
         self.clocks_log = Worker(name = 'Clocks', clock = Clock.ALL)
         self.clocks_log.log('debug', self)
+        self.direction = 0
 
     def __repr__(self):
         return (f'Relay(clock pins = {self.clock_pins}, mode = {self.mode},'
@@ -69,14 +73,33 @@ class Clocks:
             raise PulseError('Did not enter a valid Clock.')
 
         if clock == Clock.ALL:
-            for x in self.clocks:
-                self.clocks[x].pulse()
+            # for x in self.clocks:
+            #     self.clocks[x].pulse()
+            if self.direction == 0:
+                self.direction +=1
+                self.clocks[1].pulse()
+                self.clocks[2].pulse()
+            elif self.direction == 1:
+                self.direction -=1
+                self.clocks[0].pulse()
 
         elif clock == Clock.ONE: 
-            self.clocks['Clock 1'].pulse()
+            if self.direction == 0:
+                self.direction +=1
+                self.clocks[1].pulse()
+            elif self.direction == 1:
+                self.direction -=1
+                self.clocks[2].pulse()
+                self.clocks[0].pulse()
 
         elif clock == Clock.TWO:
-            self.clocks['Clock 2'].pulse()
+            if self.direction == 0:
+                self.direction +=1
+                self.clocks[2].pulse()
+            elif self.direction == 1:
+                self.direction -=1
+                self.clocks[1].pulse()
+                self.clocks[0].pulse()
 
         self.clocks_log.log('info',f'Pulsed {clock}')
         return True
@@ -89,11 +112,33 @@ class LED(Relay):
 
 if __name__ == '__main__':
     GPIO.setmode(GPIO.BCM)
-    clock = Clocks(clock_pins = (24, 25))
-    clock.pulse(clock = Clock.ALL)
-    time.sleep(1)
-    led = LED(22)
-    led.turn_on()
-    time.sleep(5)
-    led.turn_off()
+    clock = Clocks(clock_pins = (24, 25), common_pin= 23)
+    led1 = LED(24)
+    led2 = LED(25)
+    for x in range(1):
+        clock.pulse(Clock.TWO)
+        print(x)
+        time.sleep(1)
+    # clock.pulse(Clock.ONE)
+    # time.sleep(2)
+    # clock.pulse(Clock.ONE)
+    # time.sleep(2)
+        # clock.pulse(Clock.ALL)
+        # time.sleep(2)
+        # clock.pulse(Clock.ALL)
+        # time.sleep(2)
+        # clock.pulse(Clock.ALL)
+        # time.sleep(2)
+        # clock.pulse(Clock.ALL)
+        # time.sleep(2)
+        # led1.turn_on()
+        # led2.turn_on()
+        # time.sleep(5)
+        # led1.turn_off()
+        # led2.turn_off()
+        # time.sleep(5)
+    # led = LED(22)
+    # led.turn_on()
+    # time.sleep(30)
+    # led.turn_off()
     pass

@@ -41,3 +41,6 @@ def find_sunrise_sunset_times(latitude, longitude, altitude) -> dict:
         sunset_sunrise_times[idx] = time.mktime(t.astimezone(zone).timetuple())
 
     return sunset_sunrise_times
+
+if __name__ == '__main__':
+    pass

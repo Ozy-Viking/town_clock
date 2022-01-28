@@ -13,7 +13,7 @@ from Town_Clock.location_sunrise_sunset import (find_sunrise_sunset_times,
 from Town_Clock.clock_enums_exceptions import PulseError
 
 class Controller:
-    def __init__(self, clock_1_pin, clock_2_pin, led_pin, lat, long, alt) -> None:
+    def __init__(self, clock_1_pin, clock_2_pin, led_pin, common_pin, lat, long, alt) -> None:
         self.all_processes: dict(Process) = {}
         self.all_queues: dict(Queue) = {}
         self.all_events: dict(Event) = {}
@@ -42,7 +42,7 @@ class Controller:
                                     folder_path = self.setup_logger.folder_path)
         self.clock_time.logger.log('info','Clock Data Started')
 
-        self.clock_tower = ClockTower(clock_pins = (clock_1_pin, clock_2_pin), led_pin = led_pin)
+        self.clock_tower = ClockTower(clock_pins = (clock_1_pin, clock_2_pin), led_pin = led_pin, common_pin = common_pin)
         self.clock_tower.logger.log('info', 'Tower Started')
         
         self.position = {'latitude': lat, 'longitude': long, 'altitude': alt}

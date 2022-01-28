@@ -7,10 +7,10 @@ from Town_Clock.clock_enums_exceptions import Mode, PulseError, Clock
 
 
 class ClockTower:
-    def __init__(self, clock_pins, led_pin, mode: Mode = Mode.ACTIVE):
+    def __init__(self, clock_pins, led_pin, common_pin, mode: Mode = Mode.ACTIVE):
         self.mode = mode
         self.pins = {'Clock': clock_pins, 'LED': led_pin}
-        self.clock = Clocks(clock_pins = clock_pins)
+        self.clock = Clocks(clock_pins = clock_pins, common_pin = common_pin)
         self.led = LED(pin = led_pin)
         self.logger = Worker(name = 'Tower', clock = None)
         self.logger.log('debug', self)

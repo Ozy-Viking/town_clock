@@ -6,12 +6,14 @@ if __name__ == '__main__':
     
     clock_pins = 24, 25
     led_pin = 22
+    common_pin = 23
     latitude, longitude = 30.3402 * S, 152.7124 * E
     altitude = 741
     
     con = Controller(clock_1_pin = clock_pins[0], 
                     clock_2_pin = clock_pins[1],
                     led_pin = led_pin,
+                    common_pin = common_pin,
                     lat = latitude, 
                     long = longitude, 
                     alt = altitude
