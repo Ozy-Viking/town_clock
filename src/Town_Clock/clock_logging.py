@@ -98,7 +98,7 @@ class Listener:
                     'class': 'logging.handlers.RotatingFileHandler',
                     'filename': f'{log_folder}/clock.log',
                     'mode': 'a',
-                    'maxBytes': 1073741824, 
+                    'maxBytes': 500000000, 
                     'backupCount': 7,
                     'formatter': 'pulse'
                 },
@@ -113,7 +113,7 @@ class Listener:
                     'class': 'logging.handlers.RotatingFileHandler',
                     'filename': f'{pulse_log_path}',
                     'mode': 'a',
-                    'maxBytes': 129600, 
+                    'maxBytes': 500000000, 
                     'backupCount': 7,
                     'formatter': 'pulse'
                 },
@@ -212,7 +212,7 @@ class Worker:
             level = Log_Level.ERROR.value
             
         logging.config.dictConfig(self.worker_config)
-        self.logger = logging.getLogger(self.name)
+        self.logger = logging.getLogger(name)
         self.logger.log(level = level, msg = msg)
         
 

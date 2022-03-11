@@ -51,4 +51,4 @@ class PulseError(Exception):
     pass
 
 if __name__ == '__main__':
-    print(Clock(1))
+    print(Clock.ONE.value)

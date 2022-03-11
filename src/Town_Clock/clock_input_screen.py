@@ -124,8 +124,8 @@ def change_clock_value(clock: int, queue: Queue, event: Event, logger: Worker):
     write_to_screen_center(f'Changing Clock {clock}\n', 
                            f'{str(change_time_to_print(tm))} -> {change_time_to_print()}')
     event.set()
-    diff = int((tm1-tm)//60)
-    queue.put((clock,diff))
+    diff = int((tm-tm1)//60)  #If clock shows a time ahead of the current time, this will be positive. 
+    queue.put((clock, diff))
     logger.log('info', f'Putting {clock = }, {diff = } on queue')
     logger.log('info', f'Difference: {diff}')
     print(f'Difference: {diff}')

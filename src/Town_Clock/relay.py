@@ -73,8 +73,6 @@ class Clocks:
             raise PulseError('Did not enter a valid Clock.')
 
         if clock == Clock.ALL:
-            # for x in self.clocks:
-            #     self.clocks[x].pulse()
             if self.direction == 0:
                 self.direction +=1
                 self.clocks[1].pulse()
