@@ -42,7 +42,8 @@ class Controller:
         self.clock_time.logger.log('info','Clock 1 Data Started')
         
         self.position = {'latitude': lat, 'longitude': long, 'altitude': alt}
-        self.clock_tower = ClockTower(clock_pins = (clock_pins), 
+        self.clock_tower = ClockTower(clock_time = self.clock_time,
+                                      clock_pins = (clock_pins), 
                                       led_pin = led_pin, 
                                       common_pin = common_pin,
                                       position = self.position)
