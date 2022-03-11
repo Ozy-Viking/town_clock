@@ -254,7 +254,7 @@ class ClockTime:
 
     def larger_than_12_hours(self, diff, diff_secs):
         for clk, dt in enumerate(diff):
-            while dt <= -720: # adds 12 hours
+            while dt <= -(12*self.freq_pulse): # adds 12 hours
                 self.change_clock_time(12*self.freq_pulse*60, clock = clk + 1)
                 diff_secs[clk] += 12*self.freq_pulse*60
                 diff[clk] += 12*self.freq_pulse
@@ -271,7 +271,7 @@ class ClockTime:
         self._clock_time[0].clock_time = ct[0]
         self._clock_time[1].clock_time = ct[1]
     
-    def change_clock_time(self, dt: int, clk: Clock = None) -> None:
+    def change_clock_time(self, dt: int, clk: Clock = Clock.ALL) -> None:
         clock = Clock(clk)
         if clock == Clock.ALL:
             self._clock_time[0].clock_time = self._clock_time[0].clock_time + dt
@@ -281,7 +281,6 @@ class ClockTime:
         elif clock == Clock.TWO:
             self._clock_time[1].clock_time = self._clock_time[1].clock_time + dt
         self.logger.log("debug", repr(self), name = 'Pulse')
-
 
 
 if __name__ == '__main__':

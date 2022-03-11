@@ -8,8 +8,6 @@ import Town_Clock.clock_logging as c_log
 from Town_Clock.clock_data import ClockTime
 from Town_Clock.clock_logging import Listener, Worker, log_queue
 from Town_Clock.clock_mechanism import ClockTower
-from Town_Clock.location_sunrise_sunset import (find_sunrise_sunset_times,
-                                                timezone_finder)
 from Town_Clock.clock_enums_exceptions import PulseError
 
 class Controller:
@@ -105,7 +103,6 @@ class Controller:
             except Exception as e:
                 self.listener.logger.log('error', e)
 
-    
 
     def destroy(self) -> exit:
         self.listener.logger.log('critical', 'Progam being destroyed')

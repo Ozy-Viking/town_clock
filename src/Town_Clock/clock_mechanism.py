@@ -35,20 +35,17 @@ class ClockTower:
                 if (clock_pulses[0] > 0) and (clock_pulses[1] > 0):
                     ct.pulsed = self.clock.pulse(clock = Clock.ALL)
                     ct.change_clock_time(dt = ct.freq_pulse, clock = Clock.ALL)
-                    self.clock.pulse_log.log('debug', repr(ct))
                     clock_pulses[0] -= 1
                     clock_pulses[1] -= 1
                 
                 elif clock_pulses[1] == 0:
                     ct.pulsed = self.clock.pulse(clock = Clock.ONE)
                     ct.change_clock_time(dt = ct.freq_pulse, clock = Clock.ONE)
-                    self.clock.pulse_log.log('debug', repr(ct))
                     clock_pulses[0] -= 1
                     
                 elif clock_pulses[0] == 0:
                     ct.pulsed = self.clock.pulse(clock = Clock.TWO)
                     ct.change_clock_time(dt = ct.freq_pulse, clock = Clock.ONE)
-                    self.clock.pulse_log.log('debug', repr(ct))
                     clock_pulses[1] -= 1
 
                 print(clock_pulses)
@@ -59,11 +56,13 @@ class ClockTower:
             self.clock.pulse_log.log('error', 'FAILED PULSE')
             self.clock.clocks_log.log('error', f"PulseError: {err}")
             ct.pulsed = False
+            
 
         except Exception as err:
             self.clock.pulse_log.log('error', 'FAILED PULSE')
             self.clock.clocks_log.log('error', f"Exception: {err}")
             ct.pulsed = False
+        
 
     def check_if_night(self, tm):
         if tm < self.next_sunset_sunrise_times[2]:
