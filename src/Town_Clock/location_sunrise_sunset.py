@@ -6,7 +6,7 @@ from skyfield.api import wgs84, load
 from timezonefinder import TimezoneFinder
 
 
-def timezone_finder(latitude,longitude) -> dt.tzinfo:
+def timezone_finder(latitude, longitude, altitude) -> dt.tzinfo:
     tf = TimezoneFinder()
     tz = tf.timezone_at(lng=longitude, lat=latitude)
     return timezone(tz)
@@ -14,7 +14,7 @@ def timezone_finder(latitude,longitude) -> dt.tzinfo:
 
 def find_sunrise_sunset_times(latitude, longitude, altitude) -> dict:
     # Setting up Times
-    zone = timezone_finder(latitude, longitude)
+    zone = timezone_finder(latitude, longitude, altitude)
     now = zone.localize(dt.datetime.now())
     midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)
     midday = now.replace(hour=12, minute=0, second=0, microsecond=0)

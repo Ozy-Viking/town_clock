@@ -8,9 +8,10 @@ from Town_Clock.location_sunrise_sunset import find_sunrise_sunset_times, timezo
 
 
 class ClockTower:
-    def __init__(self, clock_pins, led_pin, common_pin, 
+    def __init__(self, clock_time, clock_pins, led_pin, common_pin, 
                  position, mode: Mode = Mode.ACTIVE):
         self.mode = mode
+        self.clock_time = clock_time
         self.pins = {'Clock': clock_pins, 'LED': led_pin}
         self.clock = Clocks(clock_pins = clock_pins, common_pin = common_pin)
         self.led = LED(pin = led_pin)
@@ -19,7 +20,7 @@ class ClockTower:
         self.logger.log('debug', self)
         self.next_sunset_sunrise_times = find_sunrise_sunset_times(**self.position)
         for t in self.next_sunset_sunrise_times:
-            self.next_sunset_sunrise_times[t] = ClockTime.mod_freq(self.next_sunset_sunrise_times[t])
+            self.next_sunset_sunrise_times[t] = self.clock_time.mod_freq(tm = self.next_sunset_sunrise_times[t])
         self.timezone = timezone_finder(**self.position)
         self.logger.log('info', f'{self.timezone = }, {self.next_sunset_sunrise_times = }')
 
@@ -27,7 +28,7 @@ class ClockTower:
     def __repr__(self):
         return f'ClockTower(pins = {self.pins}, mode = {self.mode})'
 
-    def pulse(self, ct: ClockTime, clock_pulses: list(int) = [0, 0], mode: Mode = Mode.ACTIVE) -> None:
+    def pulse(self, ct: ClockTime, clock_pulses: list = [0, 0], mode: Mode = Mode.ACTIVE) -> None:
         self.logger.log('debug','Pulse Method')
         try:
             ct.pulsed = False
@@ -79,7 +80,7 @@ class ClockTower:
             self.led.turn_off()
             self.next_sunset_sunrise_times = find_sunrise_sunset_times(**self.position)
             for t in self.next_sunset_sunrise_times:
-                self.next_sunset_sunrise_times[t] = ClockTime.mod_freq(self.next_sunset_sunrise_times[t])
+                self.next_sunset_sunrise_times[t] = self.clock_time.mod_freq(self.next_sunset_sunrise_times[t])
             self.logger.log('info', f'{self.timezone = }, {self.next_sunset_sunrise_times = }')
 
             
