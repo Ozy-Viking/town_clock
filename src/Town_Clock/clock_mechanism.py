@@ -34,18 +34,18 @@ class ClockTower:
             while clock_pulses != [0,0]:
                 if (clock_pulses[0] > 0) and (clock_pulses[1] > 0):
                     ct.pulsed = self.clock.pulse(clock = Clock.ALL)
-                    ct.change_clock_time(dt = ct.freq_pulse, clock = Clock.ALL)
+                    ct.change_clock_time(dt = ct.freq_pulse, clk = Clock.ALL)
                     clock_pulses[0] -= 1
                     clock_pulses[1] -= 1
                 
                 elif clock_pulses[1] == 0:
                     ct.pulsed = self.clock.pulse(clock = Clock.ONE)
-                    ct.change_clock_time(dt = ct.freq_pulse, clock = Clock.ONE)
+                    ct.change_clock_time(dt = ct.freq_pulse, clk = Clock.ONE)
                     clock_pulses[0] -= 1
                     
                 elif clock_pulses[0] == 0:
                     ct.pulsed = self.clock.pulse(clock = Clock.TWO)
-                    ct.change_clock_time(dt = ct.freq_pulse, clock = Clock.ONE)
+                    ct.change_clock_time(dt = ct.freq_pulse, clk = Clock.ONE)
                     clock_pulses[1] -= 1
 
                 print(clock_pulses)

@@ -29,6 +29,7 @@ class Relay:
     def pulse(self) -> bool:
         pulse = Thread(target = self.__pulse, name = self.name)
         pulse.start()
+        
 
     def __pulse(self):
         self.turn_on()
@@ -100,6 +101,7 @@ class Clocks:
                 self.clocks[0].pulse()
 
         self.clocks_log.log('info',f'Pulsed {clock}')
+        time.sleep(0.1)
         return True
 
 

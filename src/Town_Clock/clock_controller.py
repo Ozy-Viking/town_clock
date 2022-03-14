@@ -60,6 +60,7 @@ class Controller:
         while True:
             try:
                 if self.all_events['input_event'].is_set():
+                    self.clock_time.logger.log('debug','Input_event is set')
                     clk, self.input_diff = self.all_queues['input_queue'].get() # Tuple
                     if self.input_diff != 0:
                         self.clock_time.change_clock_time(dt = self.input_diff, clk = clk)

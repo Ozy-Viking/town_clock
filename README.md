@@ -2,9 +2,25 @@
 
 ## Overview
 
-It will:
+```mermaid
+flowchart 
+    A(Start) --> B{Bee}
+    B --> C[End]
+    B --> |Reasons| D(Alt End)
+    C --> E(Goes to Website)
+    C --> B
 
-- Output a high pulse sent to a relay every 1 minute. (Simulated)
-- Connect to gps to have an accurate time. (Simulated)
-- Auto adjust the time to factor in day light savings. (Done)
-- It will take an input of what time the clock shows and adjust it to the correct time. (working on this)
+```
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant OAuth
+    participant Server
+    Client ->>+ OAuth: Request Access Token
+    OAuth ->>- Client: Sends back token
+    Client ->>+ Server: Requests resource
+    Server ->>+ OAuth: Validates token
+    OAuth ->>- Server: Token Valid
+    Server ->>- Client: Sends resources
+

@@ -30,3 +30,4 @@ struct_time2 = Struct_Time(tm_hour = c2h, tm_min = c2m)
 input_time = [struct_time1.mktime(), 
               struct_time2.mktime()]
 print(input_time)
+# 1646927736.0; 1646927736.0
