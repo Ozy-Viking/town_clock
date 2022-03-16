@@ -42,7 +42,7 @@ class Clock(Enum):
     ONE = 1
     TWO = 2
 
-    # @property
+    @property
     def values(self):
         return 0, 1, 2
 

@@ -25,9 +25,9 @@ def find_sunrise_sunset_times(latitude, longitude, altitude) -> dict:
 
     # Setting up Position and Function
     eph = load('de421.bsp')
-    position = wgs84.latlon(latitude_degrees = latitude, 
-                            longitude_degrees = longitude, 
-                            elevation_m = altitude)
+    position = wgs84.latlon(latitude_degrees=latitude,
+                            longitude_degrees=longitude,
+                            elevation_m=altitude)
     f = almanac.dark_twilight_day(eph, position)
     times, events = almanac.find_discrete(t0, t1, f)
 
@@ -36,11 +36,12 @@ def find_sunrise_sunset_times(latitude, longitude, altitude) -> dict:
     previous_e = f(t0).item()
     idx = 0
     for t, e in zip(times, events):
-        if not e in [3,4]: continue
-        idx += 1
-        sunset_sunrise_times[idx] = time.mktime(t.astimezone(zone).timetuple())
+        if e in [3, 4]:
+            idx += 1
+            sunset_sunrise_times[idx] = time.mktime(t.astimezone(zone).timetuple())
 
     return sunset_sunrise_times
+
 
 if __name__ == '__main__':
     pass
