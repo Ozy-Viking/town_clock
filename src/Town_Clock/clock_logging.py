@@ -7,58 +7,60 @@ import queue
 import time
 from Town_Clock.clock_enums_exceptions import Clock, Log_Level
 
-
 # Constants
-log_folder = os.path.join(os.path.dirname(__file__),'clock_log')
+log_folder = os.path.join(os.path.dirname(__file__), 'clock_log')
 pulse_log_name = 'pulse.log'
-pulse_log_path = os.path.join(log_folder,pulse_log_name)
+pulse_log_path = os.path.join(log_folder, pulse_log_name)
+
 
 def get_or_create_output_folder() -> str:
-        if not os.path.exists(log_folder):
-            os.mkdir(log_folder)
-        if not os.path.exists(pulse_log_path):
-            with open(pulse_log_path, mode = 'x') as _:
-                pass
-        return log_folder
+    if not os.path.exists(log_folder):
+        os.mkdir(log_folder)
+    if not os.path.exists(pulse_log_path):
+        with open(pulse_log_path, mode='x') as _:
+            pass
+    return log_folder
 
 
 # The main process gets a simple configuration which prints to the console.
 class Setup_Log:
-    def __init__(self, name:str = 'Setup'):    
+    def __init__(self, name: str = 'Setup'):
         self.config_initial = {
-                            'version': 1,
-                            'formatters': {
-                                'simple': {
-                                    'class': 'logging.Formatter',
-                                    'format': '%(name)-15s %(levelname)-8s %(processName)-26s %(process)d %(message)s'
-                                }},
-                            'handlers': {
-                                'console': {
-                                    'class': 'logging.StreamHandler',
-                                    'level': 'DEBUG',
-                                    'formatter': 'simple'
-                                }
-                            },
-                            'root': {
-                                'handlers': ['console'],
-                                'level': 'DEBUG'
-                            }
-                        }
+            'version': 1,
+            'formatters': {
+                'simple': {
+                    'class': 'logging.Formatter',
+                    'format': '%(name)-15s %(levelname)-8s %(processName)-26s %(process)d %(message)s'
+                }},
+            'handlers': {
+                'console': {
+                    'class': 'logging.StreamHandler',
+                    'level': 'DEBUG',
+                    'formatter': 'simple'
+                }
+            },
+            'root': {
+                'handlers': ['console'],
+                'level': 'DEBUG'
+            }
+        }
         self.name = name
         self.folder_path = folder_path
         self.log('debug', self.folder_path)
 
     def log(self, level: Log_Level, msg: str, name: str = None) -> None:
         if name is None: name = self.name
-        if isinstance(level, Log_Level): level = level.value
-        elif isinstance(level, str): level = Log_Level[level.upper()].value
-        elif not isinstance(level, int): 
+        if isinstance(level, Log_Level):
+            level = level.value
+        elif isinstance(level, str):
+            level = Log_Level[level.upper()].value
+        elif not isinstance(level, int):
             msg = f"LOG ERROR: UNKNOWN VALUE {level}, {msg = }"
             level = Log_Level.ERROR.value
 
         logging.config.dictConfig(self.config_initial)
         self.logger = logging.getLogger(self.name)
-        self.logger.log(level = level, msg = msg)
+        self.logger.log(level=level, msg=msg)
 
 
 class Listener:
@@ -80,7 +82,7 @@ class Listener:
                 },
                 'pulse': {
                     'class': 'logging.Formatter',
-                    'format': '%(asctime)s.%(msecs)03d;%(levelname)-8s;%(name)-9s;%(processName)s;%(process)d;%(message)s',
+                    'format': '%(asctime)s.%(msecs)03d;%(levelname)-8s;%(name)-9s;%(processName)s;%(process)05d;%(message)s',
                     'datefmt': '%Y-%m-%d %H:%M:%S'
                 },
                 'simple': {
@@ -94,11 +96,11 @@ class Listener:
                     'formatter': 'simple',
                     'level': 'INFO'
                 },
-                'file':{
+                'file': {
                     'class': 'logging.handlers.RotatingFileHandler',
                     'filename': f'{log_folder}/clock.log',
                     'mode': 'a',
-                    'maxBytes': 500000000, 
+                    'maxBytes': 500000000,
                     'backupCount': 7,
                     'formatter': 'pulse'
                 },
@@ -109,11 +111,11 @@ class Listener:
                     'formatter': 'detailed',
                     'level': 'ERROR'
                 },
-                'pulserotate':{
+                'pulserotate': {
                     'class': 'logging.handlers.RotatingFileHandler',
                     'filename': f'{pulse_log_path}',
                     'mode': 'a',
-                    'maxBytes': 500000000, 
+                    'maxBytes': 500000000,
                     'backupCount': 7,
                     'formatter': 'pulse'
                 },
@@ -129,13 +131,13 @@ class Listener:
         self.name = name
         self.stop_event = Event()
         self.stop_event.clear()
-        self.lp = Process(target = self.listener_process, 
-                          name = self.name,
-                          args = (log_queue,),
-                          daemon = False
+        self.lp = Process(target=self.listener_process,
+                          name=self.name,
+                          args=(log_queue,),
+                          daemon=False
                           )
         self.lp.start()
-        self.logger: Worker = Worker(name = self.name, clock = None)
+        self.logger: Worker = Worker(name=self.name, clock=None)
 
     def listener_process(self, q):
         """
@@ -172,68 +174,52 @@ class MyHandler:
 
         if logger.isEnabledFor(record.levelno):
             # The process name is transformed just to show that it's the listener
-            # doing the logging to files and console
+            # does the logging to file and console
             record.processName = '%s (for %s)' % (current_process().name, record.processName)
             logger.handle(record)
 
 
 class Worker:
-    def __init__(self, name: str, clock: Clock):
+    def __init__(self, name: str, clock: Clock | None):
         # The worker process configuration is just a QueueHandler attached to the
         # root logger, which allows all messages to be sent to the queue.
         # We disable existing loggers to disable the "setup" logger used in the
         # parent process. This is needed on POSIX because the logger will
         # be there in the child following a fork().
-        self.worker_config = {  
-                              'version': 1,
-                              'disable_existing_loggers': False,
-                              'handlers': {
-                                  'queue': {
-                                      'class': 'logging.handlers.QueueHandler',
-                                      'queue': log_queue
-                                      }
-                                  },
-                              'root': {
-                                  'handlers': ['queue'],
-                                  'level': 'DEBUG'
-                                  }
-                              }
+        self.worker_config = {
+            'version': 1,
+            'disable_existing_loggers': False,
+            'handlers': {
+                'queue': {
+                    'class': 'logging.handlers.QueueHandler',
+                    'queue': log_queue
+                }
+            },
+            'root': {
+                'handlers': ['queue'],
+                'level': 'DEBUG'
+            }
+        }
         self.name = name
         self.clock = clock
         self.q = log_queue
-    
-    def log(self, level: int, msg: str, name: str = None) -> None:
-        if name is None: name = self.name
-        
-        if isinstance(level, Log_Level): level = level.value
-        elif isinstance(level, str): level = Log_Level[level.upper()].value
-        elif not isinstance(level, int): 
+        self.logger = logging.getLogger(name)
+
+    def log(self, level: int | str, msg: str, name: str = None) -> None:
+        if name is None:
+            name = self.name
+
+        if isinstance(level, Log_Level):
+            level = level.value
+        elif isinstance(level, str):
+            level = Log_Level[level.upper()].value
+        elif not isinstance(level, int):
             msg = f"LOG ERROR: UNKNOWN VALUE {level}, {msg = }"
             level = Log_Level.ERROR.value
-            
+
         logging.config.dictConfig(self.worker_config)
         self.logger = logging.getLogger(name)
-        self.logger.log(level = level, msg = msg)
-        
-
-    # def worker_process(self):
-    #     """
-    #     A number of these are spawned for the purpose of illustration. In
-    #     practice, they could be a heterogeneous bunch of processes rather than
-    #     ones which are identical to each other.
-
-    #     This initialises logging according to the specified configuration,
-    #     and logs a hundred messages with random levels to randomly selected
-    #     loggers.
-
-    #     A small sleep is added to allow other processes a chance to run. This
-    #     is not strictly needed, but it mixes the output from the different
-    #     processes a bit more than if it's left out.
-    #     """
-    #     logging.config.dictConfig(self.worker_config)
-    #     levels = [logging.DEBUG, logging.INFO, logging.WARNING, 
-    #             logging.ERROR, logging.CRITICAL]
-    #     loggers = ['Pulse', 'Pulse.one', 'Pulse.two']
+        self.logger.log(level=level, msg=msg)
 
 
 def main():
