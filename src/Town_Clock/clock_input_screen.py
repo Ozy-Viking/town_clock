@@ -78,6 +78,12 @@ def press_button(btn: str) -> None:
         time.sleep(0.0001)
 
 
+def cpu_temp_and_time():
+    print_time = time_now()
+    cpu = get_cpu_temp()
+    return f' {print_time}  {round(cpu)} C '
+    
+
 def write_to_screen_center(line_1: str, line_2: str) -> None:
     lcd.cursor_position(0, 0)
     start_1 = (16 - len(line_1)) // 2
@@ -144,7 +150,7 @@ def loop(screen_queue: Queue, input_event: Event, logger: Worker):
     change_clock = False
     c = 0
     last_time_button_pressed = time.time()
-    write_to_screen_center(get_title(c), time_now())
+    write_to_screen_center(cpu_temp_and_time(), get_title(c))
     while True:
         try:
             btn = check_button_pressed()
@@ -180,7 +186,7 @@ def loop(screen_queue: Queue, input_event: Event, logger: Worker):
                 last_time_button_pressed = go_to_sleep(logger=logger)
 
             if int((time.time() * 10) % 10) == 0 or change_clock:
-                write_to_screen_center(get_title(c), time_now())
+                write_to_screen_center(cpu_temp_and_time(), get_title(c))
         
         except KeyboardInterrupt:
             destroy()
@@ -224,6 +230,12 @@ def main(screen_queue: Queue, input_event: Event, logger: Worker):
     logger.log(10, 'LCD object made')
     logger.log(10, 'LCD loop about to start')
     loop(screen_queue, input_event, logger)
+
+
+def get_cpu_temp():
+    with open('/sys/class/thermal/thermal_zone0/temp') as file:
+        cpu = file.read()
+    return float(cpu)//1000
 
 
 if __name__ == '__main__':
