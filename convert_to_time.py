@@ -21,7 +21,7 @@ class Struct_Time:
     
     def mktime(self):
         return time.mktime((self.tm_year, self.tm_mon, self.tm_mday, self.tm_hour,
-                self.tm_min, self.tm_sec, self.tm_wday, self.tm_yday,
+                self.tm_min, 0, self.tm_wday, self.tm_yday,
                 self.tm_isdst))
 
 struct_time1 = Struct_Time(tm_hour = c1h, tm_min = c1m)

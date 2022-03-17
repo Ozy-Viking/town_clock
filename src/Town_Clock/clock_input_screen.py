@@ -10,23 +10,23 @@ from Town_Clock.clock_logging import Worker
 
 class Buttons:
     @property
-    def up(self) -> bool:
+    def Up(self) -> bool:
         return lcd.up_button
 
     @property
-    def down(self) -> bool:
+    def Down(self) -> bool:
         return lcd.down_button
 
     @property
-    def left(self) -> bool:
+    def Left(self) -> bool:
         return lcd.left_button
 
     @property
-    def right(self) -> bool:
+    def Right(self) -> bool:
         return lcd.right_button
 
     @property
-    def select(self) -> bool:
+    def Select(self) -> bool:
         return lcd.select_button
 
     @property
@@ -146,40 +146,46 @@ def loop(screen_queue: Queue, input_event: Event, logger: Worker):
     last_time_button_pressed = time.time()
     write_to_screen_center(get_title(c), time_now())
     while True:
-        btn = check_button_pressed()
-        if btn is None:
-            pass
-        elif btn == 'Select':
-            last_time_button_pressed = go_to_sleep(logger)
+        try:
+            btn = check_button_pressed()
+            if btn is None:
+                pass
+            elif btn == 'Select':
+                last_time_button_pressed = go_to_sleep(logger)
 
-        elif btn == 'Left':
-            c -= 1
-            c = c % 3
-            change_clock = True
+            elif btn == 'Left':
+                c -= 1
+                c = c % 3
+                change_clock = True
 
-        elif btn == 'Right':
-            c += 1
-            c = c % 3
-            change_clock = True
+            elif btn == 'Right':
+                c += 1
+                c = c % 3
+                change_clock = True
 
-        elif btn == 'Up' or btn == 'Down':
-            logger.log(20, f'Inputting time on clock {c}')
-            change_clock_value(clock=c,
-                               queue=screen_queue,
-                               event=input_event,
-                               logger=logger)
+            elif btn == 'Up' or btn == 'Down':
+                logger.log(20, f'Inputting time on clock {c}')
+                change_clock_value(clock=c,
+                                   queue=screen_queue,
+                                   event=input_event,
+                                   logger=logger)
 
-            lcd.clear()
+                lcd.clear()
 
-        if btn:
-            last_time_button_pressed = time.time()
+            if btn:
+                last_time_button_pressed = time.time()
 
-        td = time.time() - last_time_button_pressed
-        if td >= 60 * 5:  # Sleep after 5 min.
-            last_time_button_pressed = go_to_sleep(logger=logger)
+            td = time.time() - last_time_button_pressed
+            if td >= 60 * 5:  # Sleep after 5 min.
+                last_time_button_pressed = go_to_sleep(logger=logger)
 
-        if int((time.time() * 10) % 10) == 0 or change_clock:
-            write_to_screen_center(get_title(c), time_now())
+            if int((time.time() * 10) % 10) == 0 or change_clock:
+                write_to_screen_center(get_title(c), time_now())
+        
+        except KeyboardInterrupt:
+            destroy()
+        except Exception as err:
+            logger.log('error', f'LCD Error: {err}', name='LCD')
 
 
 def destroy():
@@ -216,14 +222,8 @@ def main(screen_queue: Queue, input_event: Event, logger: Worker):
 
     setup()
     logger.log(10, 'LCD object made')
-    try:
-        logger.log(10, 'LCD loop about to start')
-        loop(screen_queue, input_event, logger)
-    except KeyboardInterrupt:
-        destroy()
-    except Exception as err:
-        print(err)
-        destroy()
+    logger.log(10, 'LCD loop about to start')
+    loop(screen_queue, input_event, logger)
 
 
 if __name__ == '__main__':

@@ -13,6 +13,7 @@ from Town_Clock.clock_enums_exceptions import PulseError, Mode
 
 class Controller:
     def __init__(self, clock_pins, led_pin, common_pin, lat, long, alt, mode=Mode.TEST) -> None:
+        print(mode)
         self.mode = mode
         if self.mode == Mode.ACTIVE:
             import Town_Clock.clock_input_screen as lcd
@@ -60,7 +61,8 @@ class Controller:
                 self.all_processes[p].start()
         self.listener.logger.log('info', f'Alive Child Processes: {active_children()}')
         self.input_diff = 0
-
+        self.input_diff_sec = 0
+    
     def main(self):
         time.sleep(0.1)
         while True:
@@ -68,9 +70,12 @@ class Controller:
                 if self.all_events['input_event'].is_set():
                     self.clock_time.logger.log('debug', 'Input_event is set')
                     clock, self.input_diff = self.all_queues['input_queue'].get()  # Tuple
+                    self.input_diff_sec = self.input_diff * 60
                     if self.input_diff != 0:
-                        self.clock_time.change_clock_time(dt=self.input_diff, clock=clock)
+                        self.listener.logger.log('info', f'Recieved diff of {self.input_diff_sec} secs for clock {clock} from LCD.')
+                        self.clock_time.change_clock_time(dt=self.input_diff_sec, clock=clock)
                     self.input_diff = 0
+                    self.input_diff_sec = 0
                     self.all_events['input_event'].clear()
 
                 tm = time.time()

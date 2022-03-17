@@ -258,21 +258,30 @@ class ClockTime:
         for tm in tm1:
             diff_secs.append(tm - tm2)
         diff = [round(x / self.freq_pulse) for x in diff_secs]
-        print(diff)
+        # print(diff)
         for idx, dt in enumerate(diff):
-            if dt <= -(12 * self.freq_pulse):
+            if dt <= -(12 * self.freq_pulse) or dt >= (12 * self.freq_pulse):
                 diff, diff_secs = self.larger_than_12_hours(diff, diff_secs, clock=idx + 1)
-        print(diff, (12 * self.freq_pulse))
+        # print(diff, (12 * self.freq_pulse))
         return [diff, diff_secs]
 
     def larger_than_12_hours(self, diff, diff_secs, clock):
         idx = clock - 1
-        while diff[idx] <= -(12 * self.freq_pulse):  # adds 12 hours
-            self.logger.log('info', f'Larger than 12 hours: {diff} min')
-            self.logger.log('debug', f'While Loop diff >= 12 hours: {diff} min or {diff_secs} secs')
-            self.change_clock_time(12 * self.freq_pulse * 60, clock=clock)
-            diff_secs[idx] += 12 * self.freq_pulse * 60
-            diff[idx] += 12 * self.freq_pulse
+        if diff[idx] <= -(12 * self.freq_pulse):
+            while diff[idx] <= -(12 * self.freq_pulse):  # adds 12 hours
+                self.logger.log('info', f'Larger than 12 hours: {diff} min')
+                self.logger.log('debug', f'While Loop diff >= 12 hours: {diff} min or {diff_secs} secs')
+                self.change_clock_time(12 * self.freq_pulse * 60, clock=clock)
+                diff_secs[idx] += 12 * self.freq_pulse * 60
+                diff[idx] += 12 * self.freq_pulse
+        elif diff[idx] >= (12 * self.freq_pulse):
+            while diff[idx] >= (12 * self.freq_pulse):  # Subtracts 12 hours
+                self.logger.log('info', f'Larger than 12 hours: {diff} min')
+                self.logger.log('debug', f'While Loop diff >= 12 hours: {diff} min or {diff_secs} secs')
+                self.change_clock_time(-12 * self.freq_pulse * 60, clock=clock)
+                diff_secs[idx] -= 12 * self.freq_pulse * 60
+                diff[idx] -= 12 * self.freq_pulse
+        
         return diff, diff_secs
 
     @property

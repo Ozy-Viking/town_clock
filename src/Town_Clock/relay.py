@@ -1,16 +1,13 @@
 import time
+import RPi.GPIO as GPIO
 
 from Town_Clock.clock_enums_exceptions import Clock, Mode, PulseError
 from Town_Clock.clock_logging import Worker
 
 
 class Relay:
-    def __init__(self, pin: int, name: str, clock: Clock | None, mode: Mode = Mode.TEST):
+    def __init__(self, pin: int, name: str, clock: Clock | None, mode: Mode = Mode.ACTIVE):
         self.mode = mode
-
-        if self.mode == Mode.ACTIVE:
-            import RPi.GPIO as GPIO
-
         self.pin = pin
         self.name = name
         self.relay_log = Worker(name=name, clock=clock)
@@ -54,12 +51,12 @@ class Relay:
     def turn_on(self):
         if self.mode == Mode.ACTIVE:
             GPIO.output(self.pin, GPIO.LOW)
-        print(f'relay {self.name} on')
+        # print(f'relay {self.name} on')
 
     def turn_off(self):
         if self.mode == Mode.ACTIVE:
             GPIO.output(self.pin, GPIO.HIGH)
-        print(f'relay {self.name} off')
+        # print(f'relay {self.name} off')
 
 
 class LED(Relay):
