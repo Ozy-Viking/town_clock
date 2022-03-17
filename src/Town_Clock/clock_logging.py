@@ -115,8 +115,8 @@ class Listener:
                     'class': 'logging.handlers.RotatingFileHandler',
                     'filename': f'{pulse_log_path}',
                     'mode': 'a',
-                    'maxBytes': 500000000,
-                    'backupCount': 7,
+                    'maxBytes': 5000000,
+                    'backupCount': 1,
                     'formatter': 'pulse'
                 },
             },

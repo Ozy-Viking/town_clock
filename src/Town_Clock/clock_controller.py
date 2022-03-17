@@ -3,7 +3,6 @@ from logging import exception
 from multiprocessing import Event, Process, Queue, current_process, active_children
 
 import Town_Clock.clock_enums_exceptions as cee
-
 import Town_Clock.clock_logging as c_log
 from Town_Clock.clock_data import ClockTime
 from Town_Clock.clock_logging import Listener, Worker, log_queue
@@ -72,7 +71,7 @@ class Controller:
                     clock, self.input_diff = self.all_queues['input_queue'].get()  # Tuple
                     self.input_diff_sec = self.input_diff * 60
                     if self.input_diff != 0:
-                        self.listener.logger.log('info', f'Recieved diff of {self.input_diff_sec} secs for clock {clock} from LCD.')
+                        self.listener.logger.log('info', f'Received diff of {self.input_diff_sec} secs for clock {clock} from LCD.')
                         self.clock_time.change_clock_time(dt=self.input_diff_sec, clock=clock)
                     self.input_diff = 0
                     self.input_diff_sec = 0
@@ -109,6 +108,7 @@ class Controller:
                     self.clock_time.logger.log('info', f'Loop Clocktime: {self.clock_time}')
                     tp_1 = time.time()
                     self.listener.logger.log('info', f'Time Taken: {(tp_1 - tp_0) * 1000 - 1000:.2f} ms')
+                    self.listener.logger.log('info', f'CPU Temp: {get_cpu_temp():.2f}')
 
                     time.sleep(1.0001)
 
@@ -132,3 +132,9 @@ class Controller:
 
         print('\nbye....')
         exit(0)
+
+
+def get_cpu_temp():
+    with open('/sys/class/thermal/thermal_zone0/temp') as file:
+        cpu = file.read()
+    return float(cpu)/1000
