@@ -5,7 +5,7 @@ from pandas import read_csv
 from dataclasses import dataclass
 import numpy as np
 
-from Town_Clock.clock_enums_exceptions import Diff, Mode, Clock, PulseError
+from Town_Clock.clock_enums_exceptions import Diff, Mode, Clock, PulseError, NoValidTimeFromFileError
 from Town_Clock.clock_logging import Worker
 
 
@@ -159,14 +159,15 @@ class ClockTime:
             data = read_csv(self.full_path, sep=';')
 
             if not data.size:
-                raise Exception
-            ct = [float(data.tail(1).iat[0, 6]), float(data.tail(1).iat[0, 7])]
-            for tm in ct:
-                if not (type(tm) in [int, float]):
-                    raise ValueError(f'Importing error: {ct}')
+                raise NoValidTimeFromFileError
+            logtime = data.tail(3)
+            # [float(data.tail(3).iat[0, 6]), float(data.tail(3).iat[0, 7])]
+            for i in range(2,-1,-1):
+                if ct
+                pass
             self.logger.log('debug', f'Time from file: {ct}')
             return ct
-        except Exception as e:
+        except NoValidTimeFromFileError as e:
             self.logger.logger.error('Failed to access time from csv.')
             self.logger.logger.error(e)
             tm = self.mod_freq(time.time())

@@ -100,7 +100,7 @@ class Listener:
                     'class': 'logging.handlers.RotatingFileHandler',
                     'filename': f'{log_folder}/clock.log',
                     'mode': 'a',
-                    'maxBytes': 500000000,
+                    'maxBytes': 99000000,
                     'backupCount': 7,
                     'formatter': 'pulse'
                 },
@@ -115,7 +115,7 @@ class Listener:
                     'class': 'logging.handlers.RotatingFileHandler',
                     'filename': f'{pulse_log_path}',
                     'mode': 'a',
-                    'maxBytes': 5000000,
+                    'maxBytes': 50000000,
                     'backupCount': 1,
                     'formatter': 'pulse'
                 },

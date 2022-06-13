@@ -50,5 +50,8 @@ class Clock(Enum):
 class PulseError(Exception):
     pass
 
+class NoValidTimeFromFileError(Exception):
+    pass
+
 if __name__ == '__main__':
     print(Clock.ONE.value)
