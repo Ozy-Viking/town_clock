@@ -1,4 +1,5 @@
 import time
+import RPi.GPIO as GPIO
 
 from Town_Clock.clock_enums_exceptions import Clock, Mode, PulseError
 from Town_Clock.clock_logging import Worker
@@ -16,7 +17,6 @@ class Relay:
 
     def __setup(self) -> None:
         if self.mode == Mode.ACTIVE:
-            import RPi.GPIO as GPIO
             GPIO.setwarnings(False)
             GPIO.setup(self.pin, GPIO.OUT)
         else:

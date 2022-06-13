@@ -161,16 +161,15 @@ class ClockTime:
 
             if not data.size:
                 raise NoValidTimeFromFileError
+            
             logtime = data.tail(3)
-            print(logtime.iat[2,6])
-            ct=0
-            # [float(data.tail(3).iat[0, 6]), float(data.tail(3).iat[0, 7])]
             for i in range(2,-1,-1):
                 if (float(logtime.iat[i,6]) > 0) and (float(logtime.iat[i,7]) > 0):
                     ct = [float(logtime.iat[i,6]), float(logtime.iat[i,7])]
                     self.logger.log('debug', f'Time from file: {ct}')
                     return ct
             raise NoValidTimeFromFileError('No valid time in last 3 logs.')
+        
         except NoValidTimeFromFileError as e:
             self.logger.logger.error('Failed to access time from csv.')
             self.logger.logger.error(e)
