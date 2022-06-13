@@ -119,9 +119,18 @@ class Listener:
                     'backupCount': 1,
                     'formatter': 'pulse'
                 },
+                'temperature': {
+                    'class': 'logging.handlers.RotatingFileHandler',
+                    'filename': f'{pulse_log_path}/temperature.log',
+                    'mode': 'a',
+                    'maxBytes': 50000,
+                    'backupCount': 1,
+                    'formatter': 'detailed'
+                },
             },
             'loggers': {
-                'Pulse': {'handlers': ['pulserotate']}
+                'Pulse': {'handlers': ['pulserotate']},
+                'Temperature': {'handlers': ['temperature']}
             },
             'root': {
                 'handlers': ['console', 'file', 'errors'],

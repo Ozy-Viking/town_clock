@@ -108,7 +108,7 @@ class Controller:
                     self.clock_time.logger.log('info', f'Loop Clocktime: {self.clock_time}')
                     tp_1 = time.time()
                     self.listener.logger.log('info', f'Time Taken: {(tp_1 - tp_0) * 1000 - 1000:.2f} ms')
-                    self.listener.logger.log('info', f'CPU Temp: {get_cpu_temp():.2f}')
+                    self.listener.logger.log('info', f'CPU Temp: {get_cpu_temp():.2f}', 'Temperature')
 
                     time.sleep(1.0001)
 
