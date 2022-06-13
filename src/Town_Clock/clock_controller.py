@@ -27,6 +27,7 @@ class Controller:
         self.listener.logger.log('critical', 'CLOCK POWERED ON')
         self.listener.logger.log('info', 'Listener Started')
         self.all_queues['log_queue'] = log_queue
+        self.temperature = Worker(name = 'Temperature', clock = None)
 
         self.all_queues['clock_data_queue'] = Queue()
         self.all_events['clock_data_event'] = Event()
@@ -108,7 +109,7 @@ class Controller:
                     self.clock_time.logger.log('info', f'Loop Clocktime: {self.clock_time}')
                     tp_1 = time.time()
                     self.listener.logger.log('info', f'Time Taken: {(tp_1 - tp_0) * 1000 - 1000:.2f} ms')
-                    self.listener.logger.log('info', f'CPU Temp: {get_cpu_temp():.2f}', 'Temperature')
+                    self.temperature.log('info', f'CPU Temp: {get_cpu_temp():.2f}')
 
                     time.sleep(1.0001)
 

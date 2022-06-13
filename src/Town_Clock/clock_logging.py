@@ -121,7 +121,7 @@ class Listener:
                 },
                 'temperature': {
                     'class': 'logging.handlers.RotatingFileHandler',
-                    'filename': f'{pulse_log_path}/temperature.log',
+                    'filename': f'{log_folder}/temperature.log',
                     'mode': 'a',
                     'maxBytes': 50000,
                     'backupCount': 1,
