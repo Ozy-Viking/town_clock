@@ -1,5 +1,5 @@
 import time
-# import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO
 
 from Town_Clock.clock_enums_exceptions import Clock, Mode, PulseError
 from Town_Clock.clock_logging import Worker

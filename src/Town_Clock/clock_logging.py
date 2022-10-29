@@ -88,6 +88,11 @@ class Listener:
                 'simple': {
                     'class': 'logging.Formatter',
                     'format': '%(name)-15s %(levelname)-8s %(processName)-26s %(process)d %(message)s'
+                },
+                'temp':{
+                    'class': 'logging.Formatter',
+                    'format': '%(asctime)s.%(msecs)03d,%(message)s',
+                    'datefmt': '%Y-%m-%d %H:%M:%S'
                 }
             },
             'handlers': {
@@ -121,11 +126,11 @@ class Listener:
                 },
                 'temperature': {
                     'class': 'logging.handlers.RotatingFileHandler',
-                    'filename': f'{log_folder}/temperature.log',
+                    'filename': f'{log_folder}/temperature.csv',
                     'mode': 'a',
-                    'maxBytes': 50000,
+                    'maxBytes': 5000000,
                     'backupCount': 1,
-                    'formatter': 'detailed'
+                    'formatter': 'temp'
                 },
             },
             'loggers': {

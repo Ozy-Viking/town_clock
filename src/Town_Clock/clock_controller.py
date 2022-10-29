@@ -109,7 +109,11 @@ class Controller:
                     self.clock_time.logger.log('info', f'Loop Clocktime: {self.clock_time}')
                     tp_1 = time.time()
                     self.listener.logger.log('info', f'Time Taken: {(tp_1 - tp_0) * 1000 - 1000:.2f} ms')
-                    self.temperature.log('info', f'CPU Temp: {get_cpu_temp():.2f}')
+                    if get_cpu_temp() > 80:
+                        self.temperature.log('error', f'{get_cpu_temp():.2f}')
+                    else:
+                        self.temperature.log('info', f'{get_cpu_temp():.2f}')
+                    
 
                     time.sleep(1.0001)
 
