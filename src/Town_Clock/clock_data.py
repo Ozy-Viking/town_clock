@@ -1,5 +1,6 @@
 import os
 import time
+import datetime
 import glob
 from pandas import read_csv
 from dataclasses import dataclass
@@ -260,15 +261,16 @@ class ClockTime:
         elif type(tm2) not in (float, int):
             raise ValueError('tm2: Not a Number.')
 
-        diff_secs = []
+        diff_secs = list()
+        second = datetime.timedelta(seconds=1) # 1 Second in datetime.timedelta() to be used to divide.
         for tm in tm1:
-            diff_secs.append(tm - tm2)
+            diff_secs.append((to_from_iso_format(tm) - to_from_iso_format(tm2))/second)
         diff = [round(x / self.freq_pulse) for x in diff_secs]
-        # print(diff)
+
         for idx, dt in enumerate(diff):
             if dt <= -(12 * self.freq_pulse) or dt >= (12 * self.freq_pulse):
                 diff, diff_secs = self.larger_than_12_hours(diff, diff_secs, clock=idx + 1)
-        # print(diff, (12 * self.freq_pulse))
+
         return [diff, diff_secs]
 
     def larger_than_12_hours(self, diff, diff_secs, clock):
@@ -323,6 +325,11 @@ class ClockTime:
         elif clock == Clock.TWO:
             self._clock_time[1].clock_time = self._clock_time[1].clock_time + dt
         self.logger.log("debug", repr(self), name='Pulse')
+
+
+def to_from_iso_format(time_stamp:float):
+    it = time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(time_stamp))
+    return datetime.datetime.fromisoformat(it)
 
 
 if __name__ == '__main__':
