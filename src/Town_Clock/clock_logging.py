@@ -7,10 +7,6 @@ import queue
 import time
 from Town_Clock.clock_enums_exceptions import Clock, Log_Level
 
-'''
-TODO:
-1. Get the log of the systemctl service outputted to file.
-'''
 
 # Constants
 log_folder = os.path.join(os.path.dirname(__file__), 'clock_log')
