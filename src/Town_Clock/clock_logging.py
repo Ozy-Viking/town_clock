@@ -7,6 +7,11 @@ import queue
 import time
 from Town_Clock.clock_enums_exceptions import Clock, Log_Level
 
+'''
+TODO:
+1. Get the log of the systemctl service outputted to file.
+'''
+
 # Constants
 log_folder = os.path.join(os.path.dirname(__file__), 'clock_log')
 pulse_log_name = 'pulse.log'
@@ -120,7 +125,7 @@ class Listener:
                     'class': 'logging.handlers.RotatingFileHandler',
                     'filename': f'{pulse_log_path}',
                     'mode': 'a',
-                    'maxBytes': 50000000,
+                    'maxBytes': 5000,
                     'backupCount': 1,
                     'formatter': 'pulse'
                 },
@@ -128,7 +133,7 @@ class Listener:
                     'class': 'logging.handlers.RotatingFileHandler',
                     'filename': f'{log_folder}/temperature.csv',
                     'mode': 'a',
-                    'maxBytes': 5000000,
+                    'maxBytes': 500000,
                     'backupCount': 1,
                     'formatter': 'temp'
                 },

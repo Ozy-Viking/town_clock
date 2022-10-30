@@ -161,9 +161,11 @@ class ClockTime:
 
             if not data.size:
                 raise NoValidTimeFromFileError
-            
-            logtime = data.tail(3)
-            for i in range(2,-1,-1):
+            number_rows_checked = 3
+            if data.shape[0] <= 3:
+                number_rows_checked = data.shape[0]
+            logtime = data.tail(number_rows_checked)
+            for i in range(number_rows_checked-1,-1,-1):
                 if (float(logtime.iat[i,6]) > 0) and (float(logtime.iat[i,7]) > 0):
                     ct = [float(logtime.iat[i,6]), float(logtime.iat[i,7])]
                     self.logger.log('debug', f'Time from file: {ct}')
