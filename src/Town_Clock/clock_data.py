@@ -9,14 +9,7 @@ from dataclasses import dataclass  # type: ignore
 # from numpy import nan
 import numpy as np
 
-from Town_Clock.clock_enums_exceptions import (
-    Diff,
-    Mode,
-    Clock,
-    PulseError,
-    NoValidTimeFromFileError,
-)
-from Town_Clock.clock_logging import Worker
+from Town_Clock import *
 
 
 @dataclass

@@ -3,11 +3,7 @@ import time
 from multiprocessing import Event, Process, Queue, active_children
 from typing import Any  # type: ignore
 
-import Town_Clock.clock_logging as c_log
-from Town_Clock.clock_data import ClockTime
-from Town_Clock.clock_logging import Listener, Worker, LOG_QUEUE
-from Town_Clock.clock_mechanism import ClockTower
-from Town_Clock.clock_enums_exceptions import Mode
+from Town_Clock import *
 
 
 class Controller:
@@ -30,7 +26,7 @@ class Controller:
         self.all_queues: dict[str, Queue[Any]] = {}
         self.all_events: dict[str, Any] = {}  # type: ignore
 
-        self.setup_logger = c_log.Setup_Log()
+        self.setup_logger = Setup_Log()
         self.listener = Listener()
         self.all_processes["listener_process"] = self.listener.lp
         self.listener.logger.log("critical", "CLOCK POWERED ON")

@@ -1,14 +1,7 @@
 import time
 import datetime  # type:ignore
 
-from Town_Clock.clock_logging import Worker
-from Town_Clock.clock_data import ClockTime
-from Town_Clock.relay import Clocks, LED
-from Town_Clock.clock_enums_exceptions import Mode, PulseError, Clock
-from Town_Clock.location_sunrise_sunset import (
-    find_sunrise_sunset_times,
-    timezone_finder,
-)
+from Town_Clock import *
 
 
 class ClockTower:

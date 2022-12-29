@@ -5,7 +5,7 @@ import os
 from multiprocessing import Event, Process, Queue, current_process
 import queue  # type: ignore
 from typing import Any, Optional  # type: ignore
-from Town_Clock.clock_enums_exceptions import Clock, Log_Level
+from Town_Clock import *
 
 
 # Constants
@@ -199,7 +199,7 @@ class MyHandler:
 
 
 class Worker:
-    def __init__(self, name: str, clock: Clock | None) -> None:
+    def __init__(self, name: str, clock: Optional[Clock]) -> None:
         # The worker process configuration is just a QueueHandler attached to the
         # root logger, which allows all messages to be sent to the queue.
         # We disable existing loggers to disable the "setup" logger used in the
@@ -244,5 +244,5 @@ def destroy() -> None:
 
 
 main()
-LOG_QUEUE: Queue[Any] = Queue()
+LOG_QUEUE: Queue[Any] = Queue() # type: ignore
 FOLDER_PATH = get_or_create_output_folder()
