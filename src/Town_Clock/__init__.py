@@ -1,5 +1,5 @@
 from __future__ import annotations  # type: ignore
-from Town_Clock.clock_enums_exceptions import (
+from Town_Clock.enums_exceptions import (
     Diff,
     Mode,
     Clock,
@@ -17,7 +17,7 @@ __all__: list[str] = [
     "NoValidTimeFromFileError",
     "Log_Level",
 ]
-from Town_Clock.clock_logging import Worker, Listener, LOG_QUEUE, Setup_Log
+from Town_Clock.logging import Worker, Listener, LOG_QUEUE, Setup_Log
 
 __all__ += [
     "Worker",
@@ -25,11 +25,11 @@ __all__ += [
     "LOG_QUEUE",
     "Setup_Log",
 ]
-from Town_Clock.clock_data import ClockTime
+from Town_Clock.data import ClockTime
 
 __all__ += ["ClockTime"]
 
-from Town_Clock.clock_mechanism import ClockTower
+from Town_Clock.mechanism import ClockTower
 
 __all__ += ["ClockTower"]
 

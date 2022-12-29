@@ -20,7 +20,7 @@ class Controller:
         print(mode)
         self.mode = mode
         if self.mode == Mode.ACTIVE:
-            import Town_Clock.clock_input_screen as lcd
+            import Town_Clock.input_screen as lcd
 
         self.all_processes: dict[str, Process] = {}
         self.all_queues: dict[str, Queue[Any]] = {}

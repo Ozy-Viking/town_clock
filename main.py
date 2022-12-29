@@ -1,5 +1,5 @@
 from Town_Clock.controller import Controller
-from Town_Clock.clock_enums_exceptions import Mode
+from Town_Clock.enums_exceptions import Mode
 
 if __name__ == '__main__':
     N = E = +1.0
