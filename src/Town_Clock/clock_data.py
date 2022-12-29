@@ -1,13 +1,21 @@
 import os
 import time
-import datetime
-import glob
-from pandas import read_csv
-from dataclasses import dataclass
-from numpy import nan
+import datetime  # type: ignore
+import glob  # type: ignore
+from typing import Optional  # type: ignore
+from pandas import read_csv  # type: ignore
+from dataclasses import dataclass  # type: ignore
+
+# from numpy import nan
 import numpy as np
 
-from Town_Clock.clock_enums_exceptions import Diff, Mode, Clock, PulseError, NoValidTimeFromFileError
+from Town_Clock.clock_enums_exceptions import (
+    Diff,
+    Mode,
+    Clock,
+    PulseError,
+    NoValidTimeFromFileError,
+)
 from Town_Clock.clock_logging import Worker
 
 
@@ -21,12 +29,12 @@ class _ClockTime:
     local_clock_time = time.localtime(_clock_time)
     asc_clock_time = time.asctime(local_clock_time)
 
-    def __post_init__(self):
-        self.logger = Worker(name=f'{self.name}', clock=None)
-        self.logger.log('debug', repr(self))
+    def __post_init__(self) -> None:
+        self.logger = Worker(name=f"{self.name}", clock=None)
+        self.logger.log("debug", repr(self))
         self.clock_time = self._clock_time
 
-    def mod_freq(self, tm: float | int, freq: float = 0) -> float:
+    def mod_freq(self, tm: float | int, freq: float = 0) -> float | int:  # type:ignore
         """
         Mod Time to show clean minutes
 
@@ -41,19 +49,19 @@ class _ClockTime:
         Returns:
             float: Seconds rounded to the nearest minute. Unless freq is set.
         """
-        self.logger.log('debug', 'mod_freq')
+        self.logger.log("debug", "mod_freq")
         if type(tm) not in (float, int, np.float64):
-            raise ValueError('Not a Number.')
+            raise ValueError("Not a Number.")
 
         if freq > 0:
             mod_freq = freq
         elif freq == 0:
             mod_freq = self.freq_pulse
         else:
-            raise ValueError('Number less than 0.')
-        tm_mod = tm % self.freq_pulse
+            raise ValueError("Number less than 0.")
+        tm_mod = tm % mod_freq
 
-        match tm:
+        match tm:  # type: ignore
             case tm if tm_mod >= mod_freq / 2:
                 return tm + (mod_freq - tm_mod)
             case tm if tm_mod < mod_freq / 2:
@@ -67,7 +75,7 @@ class _ClockTime:
         Returns:
             float: Current clocktime as a float in seconds since epoch.
         """
-        self.logger.log('debug', f'{self.name} getter: {self._clock_time}')
+        self.logger.log("debug", f"{self.name} getter: {self._clock_time}")
         return self._clock_time
 
     @clock_time.setter
@@ -78,14 +86,14 @@ class _ClockTime:
         Args:
             tm (float, optional): Seconds since epoch at last pulse. Defaults to time.time().
 
-        Sets: 
+        Sets:
             self._clock_time_error: Error in ms at last pulse.
             self._clock_time: Cleaned version of seconds since epoch at last pulse.
                             Using a mod_freq() to round to the closest minute
             self.local_clock_time: Converts clock time to structured time from the Time module.
             self.asc_clock_time: Convert clock time into an ascii string.
         """
-        self.logger.log('debug', f'{self.name} setter: {tm}')
+        self.logger.log("debug", f"{self.name} setter: {tm}")
         self._clock_time_error = (tm % self.freq_pulse) * 1000
         self._clock_time = self.mod_freq(tm)
         self.local_clock_time = time.localtime(self._clock_time)
@@ -109,7 +117,7 @@ class ClockTime:
         _clock_time_error: float = 0.0
         _prog_start_time: float = time.localtime()
         current_time: float = time.time()
-        diff: int = 0 
+        diff: int = 0
         diff_secs: float = 0.0
         diff_state: Diff = Diff.ON_TIME
         freq_pulse: int = 60
@@ -124,64 +132,67 @@ class ClockTime:
     folder_path: str
     mode: Mode = Mode.TEST
     _clock_time_error: float = 0.0
-    _prog_start_time: time.struct_time = time.asctime()
+    _prog_start_time: str = time.asctime()
     current_time: float = time.time()
-    diff: list[int] = 0
-    diff_secs: list[float] = 0
+    diff: list[int] = [0, 0]
+    diff_secs: list[int] = [0, 0]
     diff_state: Diff = Diff.ON_TIME
     freq_pulse: int = 60
     GPS_Fix: bool = False
     pulsed: bool = False
     sleep_time: float = 0.09
 
-    def __post_init__(self):
-        self.logger = Worker(name='Clock Time', clock=None)
-        self._clock_time: list[_ClockTime, _ClockTime] = [_ClockTime(name='Clock 1 Time'),
-                                                          _ClockTime(name='Clock 2 Time')]
+    def __post_init__(self) -> None:
+        self.logger = Worker(name="Clock Time", clock=None)
+        self._clock_time: list[_ClockTime] = [
+            _ClockTime(name="Clock 1 Time"),
+            _ClockTime(name="Clock 2 Time"),
+        ]
         self.full_path = self._get_full_path()
         self.clock_time = self._get_last_time_from_file()
-        self.logger.log('debug', repr(self))
+        self.logger.log("debug", repr(self))
 
     def _get_full_path(self) -> str:
-        self.logger.log('debug', '_get_full_path')
+        self.logger.log("debug", "_get_full_path")
         folder_path = self.folder_path
-        pulse_log = '*pulse.log'
+        pulse_log = "*pulse.log"
         full_path = os.path.join(folder_path, pulse_log)
         path = glob.glob(full_path)
         if not path:
-            self.logger.log('error', 'FAILED to get full path')
-            self.logger.log('error', f'{path}')
-        self.logger.log('debug', f'{path}')
+            self.logger.log("error", "FAILED to get full path")
+            self.logger.log("error", f"{path}")
+        self.logger.log("debug", f"{path}")
 
         return path[0]
 
-    def _get_last_time_from_file(self) -> list:
-        self.logger.log('debug', '_get_last_time_from_file')
+    def _get_last_time_from_file(self) -> list[float]:
+        self.logger.log("debug", "_get_last_time_from_file")
         try:
-            data = read_csv(self.full_path, sep=';')
-
+            data = read_csv(self.full_path, sep=";")
             if not data.size:
                 raise NoValidTimeFromFileError
             number_rows_checked = 3
             if data.shape[0] <= 3:
                 number_rows_checked = data.shape[0]
             logtime = data.tail(number_rows_checked)
-            for i in range(number_rows_checked-1,-1,-1):
-                if (float(logtime.iat[i,6]) > 0) and (float(logtime.iat[i,7]) > 0):
-                    ct = [float(logtime.iat[i,6]), float(logtime.iat[i,7])]
-                    self.logger.log('debug', f'Time from file: {ct}')
+            for i in range(number_rows_checked - 1, -1, -1):
+                if (float(logtime.iat[i, 6]) > 0) and (float(logtime.iat[i, 7]) > 0):  # type: ignore
+                    ct = [float(logtime.iat[i, 6]), float(logtime.iat[i, 7])]  # type: ignore
+                    self.logger.log("debug", f"Time from file: {ct}")
                     return ct
-            raise NoValidTimeFromFileError('No valid time in last 3 logs.')
-        
+            raise NoValidTimeFromFileError("No valid time in last 3 logs.")
+
         except NoValidTimeFromFileError as e:
-            self.logger.logger.error('Failed to access time from csv.')
+            self.logger.logger.error("Failed to access time from csv.")
             self.logger.logger.error(e)
             tm = self.mod_freq(time.time())
             return [tm, tm]
 
-    def __str__(self):
-        return (f'Pulse: {self.clock_asc_time[0]}, {self.clock_asc_time[1]}, ' 
-                f'Error: {self._clock_time_error:.2f}ms')
+    def __str__(self) -> str:
+        return (
+            f"Pulse: {self.clock_asc_time[0]}, {self.clock_asc_time[1]}, "
+            f"Error: {self._clock_time_error:.2f}ms"
+        )
 
     def __repr__(self) -> str:
         """Pandas DataFrame for Logging
@@ -190,12 +201,14 @@ class ClockTime:
         Returns:
             str: Structured dataframe for logging.
         """
-        data = (f'{self.current_time:.1f};{self.clock_time[0]};{self.clock_time[1]};'
-                f'{self.diff};{self.clock_asc_time};'
-                f'{self.GPS_Fix}; Pulsed = {self.pulsed};{self._prog_start_time}')
+        data = (
+            f"{self.current_time:.1f};{self.clock_time[0]};{self.clock_time[1]};"
+            f"{self.diff};{self.clock_asc_time};"
+            f"{self.GPS_Fix}; Pulsed = {self.pulsed};{self._prog_start_time}"
+        )
         return data
 
-    def mod_freq(self, tm: float | int, freq: float = 0) -> float:
+    def mod_freq(self, tm: float | int, freq: float = 0) -> float | int:  # type:ignore
         """
         Mod Time to show clean minutes in seconds.
 
@@ -210,29 +223,31 @@ class ClockTime:
         Returns:
             float: Seconds rounded to the nearest minute. Unless freq is set.
         """
-        self.logger.log('debug', 'mod_freq')
+        self.logger.log("debug", "mod_freq")
         if type(tm) not in (float, int, np.float64):
-            raise ValueError('Not a Number.')
+            raise ValueError("Not a Number.")
 
         if freq > 0:
             mod_freq = freq
         elif freq == 0:
             mod_freq = self.freq_pulse
         else:
-            raise ValueError('Number less than 0.')
-        tm_mod = tm % self.freq_pulse
+            raise ValueError("Number less than 0.")
+        tm_mod = tm % mod_freq
 
-        match tm:
+        match tm:  # type:ignore
             case tm if tm_mod >= mod_freq / 2:
                 return tm + (mod_freq - tm_mod)
             case tm if tm_mod < mod_freq / 2:
                 return tm - tm_mod
 
-    def clock_time_diff(self, tm1: list = None, tm2: float = None) -> list[list]:
+    def clock_time_diff(
+        self, tm1: Optional[list[float]] = None, tm2: Optional[float] = None
+    ) -> list[list[int]]:
         """Clock Time Delta
         Returns the difference between time 1 (clock_time) and last pulse(time 2).
         Positive means clock is fast.
-        If the difference between the 2 times is greater than 12 hours 
+        If the difference between the 2 times is greater than 12 hours
         this will remove that difference (n*12) hours.
 
         param:
@@ -247,76 +262,91 @@ class ClockTime:
             list(int): Difference in minutes for each clock.
             list(int): Difference in seconds for each clock.
         """
-        self.logger.log('debug', 'clock_time_diff')
+        self.logger.log("debug", "clock_time_diff")
         if not tm1:
             tm1 = self.clock_time
         elif type(tm1) not in (list, tuple):
-            raise ValueError('tm1: Not a list or tuple.')
+            raise ValueError("tm1: Not a list or tuple.")
         for tm in tm1:
             if type(tm) not in (int, float):
-                raise ValueError(f'Times in list not a number: {tm1}')
+                raise ValueError(f"Times in list not a number: {tm1}")
 
         if not tm2:
             tm2 = self.current_time
         elif type(tm2) not in (float, int):
-            raise ValueError('tm2: Not a Number.')
+            raise ValueError("tm2: Not a Number.")
 
-        diff_secs = list()
-        second = datetime.timedelta(seconds=1) # 1 Second in datetime.timedelta() to be used to divide.
+        diff_secs: list[int] = list()
+        diff: list[int] = list()
+        second = datetime.timedelta(
+            seconds=1
+        )  # 1 Second in datetime.timedelta() to be used to divide.
         for tm in tm1:
-            diff_secs.append((to_from_iso_format(tm) - to_from_iso_format(tm2))/second)
+            diff_secs.append(
+                (to_from_iso_format(tm) - to_from_iso_format(tm2)) / second  # type: ignore
+            )
         diff = [round(x / self.freq_pulse) for x in diff_secs]
 
         for idx, dt in enumerate(diff):
             if dt <= -(12 * self.freq_pulse) or dt >= (12 * self.freq_pulse):
-                diff, diff_secs = self.larger_than_12_hours(diff, diff_secs, clock=idx + 1)
+                diff, diff_secs = self.larger_than_12_hours(
+                    diff, diff_secs, clock=idx + 1
+                )
 
         return [diff, diff_secs]
 
-    def larger_than_12_hours(self, diff, diff_secs, clock):
-        idx = clock - 1
+    def larger_than_12_hours(
+        self, diff: list[int], diff_secs: list[int], clock: int
+    ) -> tuple[list[int], list[int]]:
+        idx: int = clock - 1
         if diff[idx] <= -(12 * self.freq_pulse):
             while diff[idx] <= -(12 * self.freq_pulse):  # adds 12 hours
-                self.logger.log('info', f'Larger than 12 hours: {diff} min')
-                self.logger.log('debug', f'While Loop diff >= 12 hours: {diff} min or {diff_secs} secs')
+                self.logger.log("info", f"Larger than 12 hours: {diff} min")
+                self.logger.log(
+                    "debug",
+                    f"While Loop diff >= 12 hours: {diff} min or {diff_secs} secs",
+                )
                 self.change_clock_time(12 * self.freq_pulse * 60, clock=clock)
                 diff_secs[idx] += 12 * self.freq_pulse * 60
                 diff[idx] += 12 * self.freq_pulse
         elif diff[idx] >= (12 * self.freq_pulse):
             while diff[idx] >= (12 * self.freq_pulse):  # Subtracts 12 hours
-                self.logger.log('info', f'Larger than 12 hours: {diff} min')
-                self.logger.log('debug', f'While Loop diff >= 12 hours: {diff} min or {diff_secs} secs')
+                self.logger.log("info", f"Larger than 12 hours: {diff} min")
+                self.logger.log(
+                    "debug",
+                    f"While Loop diff >= 12 hours: {diff} min or {diff_secs} secs",
+                )
                 self.change_clock_time(-12 * self.freq_pulse * 60, clock=clock)
                 diff_secs[idx] -= 12 * self.freq_pulse * 60
                 diff[idx] -= 12 * self.freq_pulse
-        
+
         return diff, diff_secs
 
     @property
-    def clock_time(self) -> list:
-        return [self._clock_time[0].clock_time,
-                self._clock_time[1].clock_time]
+    def clock_time(self) -> list[float]:
+        return [self._clock_time[0].clock_time, self._clock_time[1].clock_time]
 
     @clock_time.setter
-    def clock_time(self, ct: list) -> None:
+    def clock_time(self, ct: list[float]) -> None:
         self._clock_time[0].clock_time = ct[0]
         self._clock_time[1].clock_time = ct[1]
 
     @property
-    def clock_local_time(self) -> list:
-        return [self._clock_time[0].local_clock_time,
-                self._clock_time[1].local_clock_time]
+    def clock_local_time(self) -> list[time.struct_time]:
+        return [
+            self._clock_time[0].local_clock_time,
+            self._clock_time[1].local_clock_time,
+        ]
 
     @property
-    def clock_asc_time(self) -> list:
-        return [self._clock_time[0].asc_clock_time,
-                self._clock_time[1].asc_clock_time]
+    def clock_asc_time(self) -> list[str]:
+        return [self._clock_time[0].asc_clock_time, self._clock_time[1].asc_clock_time]
 
     def change_clock_time(self, dt: int, clock: Clock | int = Clock.ALL) -> None:
-        if clock in Clock.ALL.values:
+        if clock in Clock.values():
             clock = Clock(int(clock))
         if type(clock) is not Clock:
-            raise PulseError('Did not enter a valid Clock.')
+            raise PulseError("Did not enter a valid Clock.")
         if clock == Clock.ALL:
             self._clock_time[0].clock_time = self._clock_time[0].clock_time + dt
             self._clock_time[1].clock_time = self._clock_time[1].clock_time + dt
@@ -324,13 +354,13 @@ class ClockTime:
             self._clock_time[0].clock_time = self._clock_time[0].clock_time + dt
         elif clock == Clock.TWO:
             self._clock_time[1].clock_time = self._clock_time[1].clock_time + dt
-        self.logger.log("debug", repr(self), name='Pulse')
+        self.logger.log("debug", repr(self), name="Pulse")
 
 
-def to_from_iso_format(time_stamp:float):
+def to_from_iso_format(time_stamp: float) -> datetime.datetime:
     it = time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(time_stamp))
     return datetime.datetime.fromisoformat(it)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

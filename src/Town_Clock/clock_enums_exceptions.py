@@ -1,19 +1,23 @@
-from enum import Enum, auto
+from enum import Enum, auto  # type: ignore
+from typing import Literal  # type: ignore
+
 
 class Diff(Enum):
     FAST = auto()
     SLOW = auto()
     ON_TIME = auto()
 
+
 class Log_Level(Enum):
     """Log Levels:
-        CRITICAL: 50
-        ERROR: 40
-        WARNING: 30
-        INFO: 20
-        DEBUG: 10
-        NOTSET: 0
+    CRITICAL: 50
+    ERROR: 40
+    WARNING: 30
+    INFO: 20
+    DEBUG: 10
+    NOTSET: 0
     """
+
     CRITICAL = 50
     ERROR = 40
     WARNING = 30
@@ -27,6 +31,7 @@ class Mode(Enum):
     Mode.TEST\n
     Mode.ACTIVE
     """
+
     TEST = auto()
     ACTIVE = auto()
 
@@ -38,20 +43,23 @@ class Clock(Enum):
     Args:
         Enum (String): Clock names.
     """
+
     ALL = 0
     ONE = 1
     TWO = 2
 
-    @property
-    def values(self):
+    @classmethod
+    def values(cls) -> tuple[Literal[0], Literal[1], Literal[2]]:
         return 0, 1, 2
 
 
 class PulseError(Exception):
     pass
 
+
 class NoValidTimeFromFileError(Exception):
     pass
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     print(Clock.ONE.value)

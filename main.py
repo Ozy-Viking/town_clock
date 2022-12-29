@@ -1,4 +1,4 @@
-from Town_Clock.clock_controller import Controller
+from Town_Clock.controller import Controller
 from Town_Clock.clock_enums_exceptions import Mode
 
 if __name__ == '__main__':

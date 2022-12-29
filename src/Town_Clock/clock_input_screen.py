@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-import time
-from datetime import datetime
+import time  # type: ignore
+from datetime import datetime  # type: ignore
 from multiprocessing import Queue, Event
-import board
-import adafruit_character_lcd.character_lcd_rgb_i2c as character_lcd
+from typing import Any, Optional  # type: ignore
+import board  # type: ignore
+import adafruit_character_lcd.character_lcd_rgb_i2c as character_lcd  # type: ignore
 
 from Town_Clock.clock_logging import Worker
 
@@ -11,60 +12,61 @@ from Town_Clock.clock_logging import Worker
 class Buttons:
     @property
     def Up(self) -> bool:
-        return lcd.up_button
+        return LCD.up_button
 
     @property
     def Down(self) -> bool:
-        return lcd.down_button
+        return LCD.down_button
 
     @property
     def Left(self) -> bool:
-        return lcd.left_button
+        return LCD.left_button
 
     @property
     def Right(self) -> bool:
-        return lcd.right_button
+        return LCD.right_button
 
     @property
     def Select(self) -> bool:
-        return lcd.select_button
+        return LCD.select_button
 
     @property
-    def buttons(self):
-        return {'Up': lcd.up_button,
-                'Down': lcd.down_button,
-                'Left': lcd.left_button,
-                'Right': lcd.right_button,
-                'Select': lcd.select_button
-                }
+    def buttons(self) -> dict[str, Any]:
+        return {
+            "Up": LCD.up_button,
+            "Down": LCD.down_button,
+            "Left": LCD.left_button,
+            "Right": LCD.right_button,
+            "Select": LCD.select_button,
+        }
 
 
-def time_now():  # get system time
-    return datetime.now().strftime('%H:%M:%S')
+def time_now() -> str:  # get system time
+    return datetime.now().strftime("%H:%M:%S")
 
 
 def get_title(c: int) -> str:
     if not c:
-        return 'Both Clocks'
-    return f'Clock {c}'
+        return "Both Clocks"
+    return f"Clock {c}"
 
 
 def go_to_sleep(logger: Worker) -> float:
-    logger.log(20, 'LCD sleeping')
-    lcd.color = [0, 0, 0]  # turn on LCD backlight
-    lcd.clear()
+    logger.log(20, "LCD sleeping")
+    LCD.color = [0, 0, 0]  # turn on LCD backlight
+    LCD.clear()
     while True:
         # print('Sleeing')
         time.sleep(0.5)
         if check_button_pressed():  # if button is pressed
             break
 
-    lcd.color = [100, 0, 0]
-    logger.log(20, 'LCD Waking Up')
+    LCD.color = [100, 0, 0]
+    logger.log(20, "LCD Waking Up")
     return time.time()
 
 
-def check_button_pressed() -> str:
+def check_button_pressed() -> str | None:
     pressed_buttons = buttons.buttons
     for btn, val in pressed_buttons.items():
         if val:
@@ -78,75 +80,80 @@ def press_button(btn: str) -> None:
         time.sleep(0.0001)
 
 
-def cpu_temp_and_time():
-    print_time = time_now()
-    cpu = get_cpu_temp()
-    return f' {print_time}  {round(cpu)} C '
-    
+def cpu_temp_and_time() -> str:
+    print_time: str = time_now()
+    cpu: float = get_cpu_temp()
+    return f" {print_time}  {round(cpu)} C "
+
 
 def write_to_screen_center(line_1: str, line_2: str) -> None:
-    lcd.cursor_position(0, 0)
+    LCD.cursor_position(0, 0)
     start_1 = (16 - len(line_1)) // 2
     start_2 = (16 - len(line_2)) // 2
-    space_1 = ' ' * start_1
-    space_2 = ' ' * start_2
-    lcd.message = (f'{space_1}{line_1}{space_1}\n'
-                   f'{space_2}{line_2}{space_2}')  # display the time
+    space_1 = " " * start_1
+    space_2 = " " * start_2
+    LCD.message = (
+        f"{space_1}{line_1}{space_1}\n" f"{space_2}{line_2}{space_2}"
+    )  # display the time
 
 
-def change_clock_value(clock: int, queue: Queue, event: Event, logger: Worker):
+def change_clock_value(clock: int, queue: Queue, event: Event, logger: Worker) -> None:  # type: ignore
     tm = time.time() // 1
     tm1 = tm
 
-    lcd.cursor = True
+    LCD.cursor = True
     press = None
     p = 0
     cursor = [5, 4, 2, 1]  # Position
-    amount = [60, 60 * 10, 60 ** 2, 60 ** 2 * 10]  # Amount to add or subtract
+    amount = [60, 60 * 10, 60**2, 60**2 * 10]  # Amount to add or subtract
 
     while True:
-        write_to_screen_center(f'Clock {clock} shows',
-                               f'{str(change_time_to_print(tm))} -> {change_time_to_print(tm1)}')
-        lcd.cursor_position(cursor[p], 1)
+        write_to_screen_center(
+            f"Clock {clock} shows",
+            f"{str(change_time_to_print(tm))} -> {change_time_to_print(tm1)}",
+        )
+        LCD.cursor_position(cursor[p], 1)
         while press is None:
             press = check_button_pressed()
-        if press == 'Up':
+        if press == "Up":
             tm += amount[p]
-        elif press == 'Down':
+        elif press == "Down":
             tm -= amount[p]
-        elif press == 'Left':
+        elif press == "Left":
             p = (p + 1) % 4
-        elif press == 'Right':
+        elif press == "Right":
             p = (p - 1) % 4
-        elif press == 'Select':
+        elif press == "Select":
             break
 
         press = None
         time.sleep(debounce_sleep)
 
-    lcd.cursor = False
-    write_to_screen_center(f'Changing Clock {clock}\n',
-                           f'{change_time_to_print(tm)} -> {change_time_to_print()}')
-    event.set()
+    LCD.cursor = False
+    write_to_screen_center(
+        f"Changing Clock {clock}\n",
+        f"{change_time_to_print(tm)} -> {change_time_to_print()}",
+    )
+    event.set()  # type: ignore
 
     # If clock shows a time ahead of the current time, this will be positive.
     diff = int((tm - tm1) // 60)
-    queue.put((clock, diff))
-    logger.log('info', f'Putting {clock = }, {diff = } on queue')
-    logger.log('info', f'Difference: {diff}')
-    print(f'Difference: {diff}')
+    queue.put((clock, diff))  # type: ignore
+    logger.log("info", f"Putting {clock = }, {diff = } on queue")
+    logger.log("info", f"Difference: {diff}")
+    print(f"Difference: {diff}")
     time.sleep(2)
 
 
-def change_time_to_print(tm: float = None):  # get system time
+def change_time_to_print(tm: Optional[float] = None) -> str:  # get system time
     if tm is None:
         tm = time.time()
-    return datetime.fromtimestamp(tm).strftime('%H:%M')
+    return datetime.fromtimestamp(tm).strftime("%H:%M")
 
 
-def loop(screen_queue: Queue, input_event: Event, logger: Worker):
-    lcd.clear()
-    lcd.color = [100, 0, 0]  # turn on LCD backlight
+def loop(screen_queue: Queue, input_event: Event, logger: Worker) -> None:  # type: ignore
+    LCD.clear()
+    LCD.color = [100, 0, 0]  # turn on LCD backlight
     change_clock = False
     c = 0
     last_time_button_pressed = time.time()
@@ -156,27 +163,26 @@ def loop(screen_queue: Queue, input_event: Event, logger: Worker):
             btn = check_button_pressed()
             if btn is None:
                 pass
-            elif btn == 'Select':
+            elif btn == "Select":
                 last_time_button_pressed = go_to_sleep(logger)
 
-            elif btn == 'Left':
+            elif btn == "Left":
                 c -= 1
                 c = c % 3
                 change_clock = True
 
-            elif btn == 'Right':
+            elif btn == "Right":
                 c += 1
                 c = c % 3
                 change_clock = True
 
-            elif btn == 'Up' or btn == 'Down':
-                logger.log(20, f'Inputting time on clock {c}')
-                change_clock_value(clock=c,
-                                   queue=screen_queue,
-                                   event=input_event,
-                                   logger=logger)
+            elif btn == "Up" or btn == "Down":
+                logger.log(20, f"Inputting time on clock {c}")
+                change_clock_value(
+                    clock=c, queue=screen_queue, event=input_event, logger=logger  # type: ignore
+                )
 
-                lcd.clear()
+                LCD.clear()
 
             if btn:
                 last_time_button_pressed = time.time()
@@ -187,38 +193,38 @@ def loop(screen_queue: Queue, input_event: Event, logger: Worker):
 
             if int((time.time() * 10) % 10) == 0 or change_clock:
                 write_to_screen_center(cpu_temp_and_time(), get_title(c))
-        
+
         except KeyboardInterrupt:
             destroy()
         except Exception as err:
-            logger.log('error', f'LCD Error: {err}', name='LCD')
+            logger.log("error", f"LCD Error: {err}", name="LCD")
 
 
-def destroy():
-    write_to_screen_center('Goodbye.....', ' ')
+def destroy() -> None:
+    write_to_screen_center("Goodbye.....", " ")
     time.sleep(1)
-    lcd.color = [0, 0, 0]  # turn off LCD backlight
-    lcd.clear()
+    LCD.color = [0, 0, 0]  # turn off LCD backlight
+    LCD.clear()
 
 
-def setup():
+def setup() -> None:
     pass
 
 
-def main(screen_queue: Queue, input_event: Event, logger: Worker):
-    logger.log(10, 'Starting main')
+def main(screen_queue: Queue, input_event: Event, logger: Worker) -> None:  # type: ignore
+    logger.log(10, "Starting main")
 
     # Modify this if you have a different sized Character LCD
     lcd_columns = 16
     lcd_rows = 2
 
     # Initialise I2C bus.
-    i2c = board.I2C()  # uses board.SCL and board.SDA
+    i2c: Any = board.I2C()  # type: ignore # uses board.SCL and board.SDA
 
     # Initialise the LCD class
-    global lcd
-    lcd = character_lcd.Character_LCD_RGB_I2C(i2c, lcd_columns, lcd_rows)
-    logger.log(10, 'LCD object made')
+    global LCD
+    LCD: Any = character_lcd.Character_LCD_RGB_I2C(i2c, lcd_columns, lcd_rows)  # type: ignore
+    logger.log(10, "LCD object made")
 
     global debounce_sleep
     debounce_sleep = 0.001
@@ -227,16 +233,16 @@ def main(screen_queue: Queue, input_event: Event, logger: Worker):
     buttons = Buttons()
 
     setup()
-    logger.log(10, 'LCD object made')
-    logger.log(10, 'LCD loop about to start')
-    loop(screen_queue, input_event, logger)
+    logger.log(10, "LCD object made")
+    logger.log(10, "LCD loop about to start")
+    loop(screen_queue, input_event, logger)  # type: ignore
 
 
-def get_cpu_temp():
-    with open('/sys/class/thermal/thermal_zone0/temp') as file:
+def get_cpu_temp() -> float:
+    with open("/sys/class/thermal/thermal_zone0/temp") as file:
         cpu = file.read()
-    return float(cpu)//1000
+    return float(cpu) // 1000
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass
