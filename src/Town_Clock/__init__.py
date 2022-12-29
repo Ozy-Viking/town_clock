@@ -1,13 +1,15 @@
+from __future__ import annotations  # type: ignore
 from Town_Clock.clock_enums_exceptions import (
     Diff,
     Mode,
     Clock,
     PulseError,
     NoValidTimeFromFileError,
-    Log_Level
+    Log_Level,
 )
 
 __all__: list[str] = [
+    "annotations",
     "Diff",
     "Mode",
     "Clock",
