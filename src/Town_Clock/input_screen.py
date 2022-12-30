@@ -14,32 +14,32 @@ from Town_Clock import *
 class Buttons:
     @property
     def Up(self) -> bool:
-        return LCD.up_button
+        return LCD_SCREEN.up_button
 
     @property
     def Down(self) -> bool:
-        return LCD.down_button
+        return LCD_SCREEN.down_button
 
     @property
     def Left(self) -> bool:
-        return LCD.left_button
+        return LCD_SCREEN.left_button
 
     @property
     def Right(self) -> bool:
-        return LCD.right_button
+        return LCD_SCREEN.right_button
 
     @property
     def Select(self) -> bool:
-        return LCD.select_button
+        return LCD_SCREEN.select_button
 
     @property
     def buttons(self) -> dict[str, Any]:
         return {
-            "Up": LCD.up_button,
-            "Down": LCD.down_button,
-            "Left": LCD.left_button,
-            "Right": LCD.right_button,
-            "Select": LCD.select_button,
+            "Up": LCD_SCREEN.up_button,
+            "Down": LCD_SCREEN.down_button,
+            "Left": LCD_SCREEN.left_button,
+            "Right": LCD_SCREEN.right_button,
+            "Select": LCD_SCREEN.select_button,
         }
 
 
@@ -55,15 +55,15 @@ def get_title(c: int) -> str:
 
 def go_to_sleep(logger: Worker) -> float:
     logger.log(20, "LCD sleeping")
-    LCD.color = [0, 0, 0]  # turn on LCD backlight
-    LCD.clear()
+    LCD_SCREEN.color = [0, 0, 0]  # turn on LCD backlight
+    LCD_SCREEN.clear()
     while True:
         # print('Sleeing')
         time.sleep(0.5)
         if check_button_pressed():  # if button is pressed
             break
 
-    LCD.color = [100, 0, 0]
+    LCD_SCREEN.color = [100, 0, 0]
     logger.log(20, "LCD Waking Up")
     return time.time()
 
@@ -89,19 +89,19 @@ def cpu_temp_and_time() -> str:
 
 
 def write_to_screen_center(line_1: str, line_2: str) -> None:
-    LCD.cursor_position(0, 0)
+    LCD_SCREEN.cursor_position(0, 0)
     start_1 = (16 - len(line_1)) // 2
     start_2 = (16 - len(line_2)) // 2
     space_1 = " " * start_1
     space_2 = " " * start_2
-    LCD.message = f"{space_1}{line_1}{space_1}\n" f"{space_2}{line_2}{space_2}"
+    LCD_SCREEN.message = f"{space_1}{line_1}{space_1}\n" f"{space_2}{line_2}{space_2}"
 
 
 def change_clock_value(clock: int, queue: Queue, event: Event, logger: Worker) -> None:  # type: ignore
     tm = time.time() // 1
     tm1 = tm
 
-    LCD.cursor = True
+    LCD_SCREEN.cursor = True
     press = None
     cursor_index = 0
     valid_positions = [5, 4, 2, 1]  # Position
@@ -112,7 +112,7 @@ def change_clock_value(clock: int, queue: Queue, event: Event, logger: Worker) -
             f"Clock {clock} shows",
             f"{str(change_time_to_print(tm))} -> {change_time_to_print(tm1)}",
         )
-        LCD.cursor_position(valid_positions[cursor_index], 1)
+        LCD_SCREEN.cursor_position(valid_positions[cursor_index], 1)
         while press is None:
             press = check_button_pressed()
         if press == "Up":
@@ -129,7 +129,7 @@ def change_clock_value(clock: int, queue: Queue, event: Event, logger: Worker) -
         press = None
         time.sleep(debounce_sleep)
 
-    LCD.cursor = False
+    LCD_SCREEN.cursor = False
     write_to_screen_center(
         f"Changing Clock {clock}\n",
         f"{change_time_to_print(tm)} -> {change_time_to_print()}",
@@ -152,8 +152,8 @@ def change_time_to_print(tm: Optional[float] = None) -> str:  # get system time
 
 
 def loop(screen_queue: Queue, input_event: Event, logger: Worker) -> None:  # type: ignore
-    LCD.clear()
-    LCD.color = [100, 0, 0]  # turn on LCD backlight
+    LCD_SCREEN.clear()
+    LCD_SCREEN.color = [100, 0, 0]  # turn on LCD backlight
     change_clock = False
     c = 0
     last_time_button_pressed = time.time()
@@ -182,7 +182,7 @@ def loop(screen_queue: Queue, input_event: Event, logger: Worker) -> None:  # ty
                     clock=c, queue=screen_queue, event=input_event, logger=logger  # type: ignore
                 )
 
-                LCD.clear()
+                LCD_SCREEN.clear()
 
             if btn:
                 last_time_button_pressed = time.time()
@@ -203,8 +203,8 @@ def loop(screen_queue: Queue, input_event: Event, logger: Worker) -> None:  # ty
 def destroy() -> None:
     write_to_screen_center("Goodbye.....", " ")
     time.sleep(1)
-    LCD.color = [0, 0, 0]  # turn off LCD backlight
-    LCD.clear()
+    LCD_SCREEN.color = [0, 0, 0]  # turn off LCD backlight
+    LCD_SCREEN.clear()
 
 
 def setup() -> None:
@@ -222,8 +222,8 @@ def lcd_main(screen_queue: Queue, input_event: Event, logger: Worker) -> None:  
     i2c: Any = board.I2C()  # type: ignore # uses board.SCL and board.SDA
 
     # Initialise the LCD class
-    global LCD
-    LCD: Any = character_lcd.Character_LCD_RGB_I2C(i2c, lcd_columns, lcd_rows)  # type: ignore
+    global LCD_SCREEN
+    LCD_SCREEN: Any = character_lcd.Character_LCD_RGB_I2C(i2c, lcd_columns, lcd_rows)  # type: ignore
     logger.log(10, "LCD object made")
 
     global debounce_sleep
