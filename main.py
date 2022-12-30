@@ -17,7 +17,7 @@ if __name__ == "__main__":
         lat=latitude,
         long=longitude,
         alt=altitude,
-        mode=Mode.ACTIVE,
+        mode=Mode.TEST,
     )
 
     # Main loop
