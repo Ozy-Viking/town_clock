@@ -1,7 +1,6 @@
-from Town_Clock.controller import Controller
-from Town_Clock.enums_exceptions import Mode
+from Town_Clock import Controller, Mode
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     N = E = +1.0
     S = W = -1.0
 
@@ -11,15 +10,16 @@ if __name__ == '__main__':
     latitude, longitude = 30.3402 * S, 152.7124 * E
     altitude = 741
 
-    con = Controller(clock_pins=clock_pins,
-                     led_pin=led_pin,
-                     common_pin=common_pin,
-                     lat=latitude,
-                     long=longitude,
-                     alt=altitude,
-                     mode=Mode.ACTIVE
-                     )
+    controller = Controller(
+        clock_pins=clock_pins,
+        led_pin=led_pin,
+        common_pin=common_pin,
+        lat=latitude,
+        long=longitude,
+        alt=altitude,
+        mode=Mode.ACTIVE,
+    )
 
     # Main loop
     while True:
-        con.main()
+        controller.main()

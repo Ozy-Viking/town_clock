@@ -10,6 +10,7 @@ from Town_Clock import *
 
 # todo: Check types and remove ignore tags/Any types.
 
+
 class Buttons:
     @property
     def Up(self) -> bool:
@@ -93,9 +94,7 @@ def write_to_screen_center(line_1: str, line_2: str) -> None:
     start_2 = (16 - len(line_2)) // 2
     space_1 = " " * start_1
     space_2 = " " * start_2
-    LCD.message = (
-        f"{space_1}{line_1}{space_1}\n" f"{space_2}{line_2}{space_2}"
-    )  # display the time
+    LCD.message = f"{space_1}{line_1}{space_1}\n" f"{space_2}{line_2}{space_2}"
 
 
 def change_clock_value(clock: int, queue: Queue, event: Event, logger: Worker) -> None:  # type: ignore
@@ -104,8 +103,8 @@ def change_clock_value(clock: int, queue: Queue, event: Event, logger: Worker) -
 
     LCD.cursor = True
     press = None
-    p = 0
-    cursor = [5, 4, 2, 1]  # Position
+    cursor_index = 0
+    valid_positions = [5, 4, 2, 1]  # Position
     amount = [60, 60 * 10, 60**2, 60**2 * 10]  # Amount to add or subtract
 
     while True:
@@ -113,17 +112,17 @@ def change_clock_value(clock: int, queue: Queue, event: Event, logger: Worker) -
             f"Clock {clock} shows",
             f"{str(change_time_to_print(tm))} -> {change_time_to_print(tm1)}",
         )
-        LCD.cursor_position(cursor[p], 1)
+        LCD.cursor_position(valid_positions[cursor_index], 1)
         while press is None:
             press = check_button_pressed()
         if press == "Up":
-            tm += amount[p]
+            tm += amount[cursor_index]
         elif press == "Down":
-            tm -= amount[p]
+            tm -= amount[cursor_index]
         elif press == "Left":
-            p = (p + 1) % 4
+            cursor_index = (cursor_index + 1) % 4
         elif press == "Right":
-            p = (p - 1) % 4
+            cursor_index = (cursor_index - 1) % 4
         elif press == "Select":
             break
 
