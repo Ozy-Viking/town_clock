@@ -211,7 +211,7 @@ def setup() -> None:
     pass
 
 
-def main(screen_queue: Queue, input_event: Event, logger: Worker) -> None:  # type: ignore
+def lcd_main(screen_queue: Queue, input_event: Event, logger: Worker) -> None:  # type: ignore
     logger.log(10, "Starting main")
 
     # Modify this if you have a different sized Character LCD

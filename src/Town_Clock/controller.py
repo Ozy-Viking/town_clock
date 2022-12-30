@@ -19,8 +19,6 @@ class Controller:
     ) -> None:
         print(mode)
         self.mode = mode
-        if self.mode == Mode.ACTIVE:
-            import Town_Clock.input_screen as lcd
 
         self.all_processes: dict[str, Process] = {}
         self.all_queues: dict[str, Queue[Any]] = {}
@@ -40,8 +38,10 @@ class Controller:
         self.all_queues["input_queue"] = Queue()
         self.all_events["input_event"] = Event()
         if self.mode == Mode.ACTIVE:
+            import Town_Clock.input_screen as lcd
+
             self.all_processes["input_process"] = Process(
-                target=lcd.main,  # type: ignore
+                target=lcd.lcd_main,  # type: ignore
                 name="Screen",
                 args=(
                     self.all_queues["input_queue"],
@@ -52,7 +52,9 @@ class Controller:
             )
 
         self.clock_time = ClockTime(
-            freq_pulse=60, folder_path=self.setup_logger.folder_path, mode=self.mode
+            freq_pulse=60,
+            folder_path=self.setup_logger.folder_path,
+            mode=self.mode,
         )
         self.clock_time.logger.log("info", "Clock 1 Data Started")
 
@@ -174,7 +176,7 @@ class Controller:
         """
         if local_time.tm_hour == 2 and local_time.tm_min == 0:
             self.destroy()
-            os.system("shutdown /r /t 1")
+            os.system("init 6")  # "shutdown /r /t 1")
 
 
 def get_cpu_temp() -> float:
