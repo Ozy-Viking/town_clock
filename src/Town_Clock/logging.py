@@ -146,15 +146,15 @@ class Listener:
         self.stop_event = Event()
         self.stop_event.clear()
         self.lp = Process(
-            target=self.listener_process,
+            target=self.listener_process,  # type: ignore
             name=self.name,
-            args=(LOG_QUEUE,),
+            args=(LOG_QUEUE,),  # type: ignore
             daemon=False,
         )
         self.lp.start()
         self.logger: Worker = Worker(name=self.name, clock=None)
 
-    def listener_process(self, q: Queue[Any]) -> None:
+    def listener_process(self, q: Queue) -> None:   # type: ignore
         """
         This could be done in the main process, but is just done in a separate
         process for illustrative purposes.
@@ -215,7 +215,7 @@ class Worker:
         }
         self.name = name
         self.clock = clock
-        self.q = LOG_QUEUE
+        self.q = LOG_QUEUE # type: ignore
         self.logger = logging.getLogger(name)
 
     def log(self, level: int | str, msg: str, name: Optional[str] = None) -> None:
@@ -244,5 +244,5 @@ def destroy() -> None:
 
 
 main()
-LOG_QUEUE: Queue[Any] = Queue() # type: ignore
+LOG_QUEUE: Queue = Queue() # type: ignore
 FOLDER_PATH = get_or_create_output_folder()

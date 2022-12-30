@@ -1,4 +1,4 @@
-from Town_Clock import Controller, Mode
+from Town_Clock import *
 
 if __name__ == "__main__":
     N = E = +1.0

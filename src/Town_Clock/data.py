@@ -4,7 +4,7 @@ import datetime  # type: ignore
 import glob  # type: ignore
 from typing import Optional  # type: ignore
 from pandas import read_csv  # type: ignore
-from dataclasses import dataclass  # type: ignore
+from dataclasses import dataclass, field  # type: ignore
 
 # from numpy import nan
 import numpy as np
@@ -123,17 +123,17 @@ class ClockTime:
     """
 
     folder_path: str
-    mode: Mode = Mode.TEST
-    _clock_time_error: float = 0.0
-    _prog_start_time: str = time.asctime()
-    current_time: float = time.time()
-    diff: list[int] = [0, 0]
-    diff_secs: list[int] = [0, 0]
-    diff_state: Diff = Diff.ON_TIME
-    freq_pulse: int = 60
-    GPS_Fix: bool = False
-    pulsed: bool = False
-    sleep_time: float = 0.09
+    mode: Mode = field(default=Mode.TEST)
+    _clock_time_error: float = field(default=0.0)
+    _prog_start_time: str = field(default=time.asctime())
+    current_time: float = field(default=time.time())
+    diff: list[int] = field(default_factory=list)
+    diff_secs: list[int] = field(default_factory=list)
+    diff_state: Diff = field(default=Diff.ON_TIME)
+    freq_pulse: int = field(default=60)
+    GPS_Fix: bool = field(default=False)
+    pulsed: bool = field(default=False)
+    sleep_time: float = field(default=0.09)
 
     def __post_init__(self) -> None:
         self.logger = Worker(name="Clock Time", clock=None)
