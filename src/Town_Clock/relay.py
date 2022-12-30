@@ -1,4 +1,5 @@
 import time
+import RPi.GPIO as GPIO
 
 from Town_Clock import *
 
@@ -17,8 +18,6 @@ class Relay:
 
     def __setup(self) -> None:
         if self.mode == Mode.ACTIVE:
-            import RPi.GPIO as GPIO
-
             GPIO.setwarnings(False)
             GPIO.setup(self.pin, GPIO.OUT)
         else:
