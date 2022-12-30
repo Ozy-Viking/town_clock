@@ -159,14 +159,16 @@ class Controller:
                 time.sleep(1)
 
     def destroy(self, restart: bool = False) -> None:
-        self.listener.logger.log("critical", "Program being destroyed")
+        self.listener.logger.log("critical", f"Program being destroyed, {restart = }")
         self.listener.stop_event.set()
-        for p in self.all_processes:
-            self.all_processes[p].join()
-        for q in self.all_queues:
-            self.all_queues[q].close()
 
         if not restart:
+
+            for p in self.all_processes:
+                self.all_processes[p].join()
+            for q in self.all_queues:
+                self.all_queues[q].close()
+
             print("\nbye....")
             exit(0)
 
@@ -174,8 +176,9 @@ class Controller:
         """
         Restart Computer at 2am every day.
         """
-        if (local_time.tm_hour == 2 and local_time.tm_min == 0) or force:
-            self.destroy()
+        if (local_time.tm_hour == 8 and local_time.tm_min == 3) or force:
+            self.listener.logger.log("critical", f"Program being restarted.")
+            self.destroy(restart=True)
             os.system("sudo init 6")
 
 
