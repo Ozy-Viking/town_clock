@@ -170,11 +170,11 @@ class Controller:
             print("\nbye....")
             exit(0)
 
-    def restart(self, local_time: time.struct_time) -> None:
+    def restart(self, local_time: time.struct_time, force: bool = False) -> None:
         """
         Restart Computer at 2am every day.
         """
-        if local_time.tm_hour == 19 and local_time.tm_min == 15:
+        if (local_time.tm_hour == 19 and local_time.tm_min == 40) or force:
             self.destroy()
             os.system("init 6")  # "shutdown /r /t 1")
 

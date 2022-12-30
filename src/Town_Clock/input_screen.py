@@ -223,7 +223,7 @@ def lcd_main(screen_queue: Queue, input_event: Event, logger: Worker) -> None:  
 
     # Initialise the LCD class
     global LCD_SCREEN
-    LCD_SCREEN: Any = character_lcd.Character_LCD_RGB_I2C(i2c, lcd_columns, lcd_rows)  # type: ignore
+    LCD_SCREEN = character_lcd.Character_LCD_RGB_I2C(i2c, lcd_columns, lcd_rows)  # type: ignore
     logger.log(10, "LCD object made")
 
     global debounce_sleep
