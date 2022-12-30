@@ -12,7 +12,7 @@ class ClockTower:
         led_pin: int,
         common_pin: int,
         position: dict[str, float],
-        mode: Mode = Mode.TEST,
+        mode: Mode = Mode.ACTIVE,
     ) -> None:
         self.mode = mode
         self.clock_time = clock_time

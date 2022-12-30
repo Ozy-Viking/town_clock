@@ -174,7 +174,7 @@ class Controller:
         """
         Restart Computer at 2am every day.
         """
-        if local_time.tm_hour == 19 and local_time.tm_min == 10:
+        if local_time.tm_hour == 19 and local_time.tm_min == 15:
             self.destroy()
             os.system("init 6")  # "shutdown /r /t 1")
 

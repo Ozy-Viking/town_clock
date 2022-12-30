@@ -5,7 +5,7 @@ from Town_Clock import *
 
 class Relay:
     def __init__(
-        self, pin: int, name: str, clock: Clock | None, mode: Mode = Mode.TEST
+        self, pin: int, name: str, clock: Clock | None, mode: Mode = Mode.ACTIVE
     ) -> None:
         self.mode = mode
         self.pin = pin
@@ -58,12 +58,14 @@ class Relay:
     def turn_on(self) -> None:
         if self.mode == Mode.ACTIVE:
             GPIO.output(self.pin, GPIO.LOW)
-        # print(f'relay {self.name} on')
+        else:
+            print(f"relay {self.name} on")
 
     def turn_off(self) -> None:
         if self.mode == Mode.ACTIVE:
             GPIO.output(self.pin, GPIO.HIGH)
-        # print(f'relay {self.name} off')
+        else:
+            print(f"relay {self.name} off")
 
 
 class LED(Relay):
@@ -76,10 +78,10 @@ class Clocks:
         self.mode = mode
         self.clocks: dict[int, Relay] = dict()
         self.clock_pins = clock_pins
-        self.clocks[0] = Relay(pin=common_pin, name="Common", clock=None)
+        self.clocks[0] = Relay(pin=common_pin, name="Common", clock=None, mode=mode)
         for idx, pin in enumerate(clock_pins):
             self.clocks[idx + 1] = Relay(
-                pin=pin, name=f"Clock {idx + 1}", clock=Clock(idx + 1)
+                pin=pin, name=f"Clock {idx + 1}", clock=Clock(idx + 1), mode=mode
             )
         self.qty_clock = len(clock_pins)
         self.pulse_log = Worker(name="Pulse", clock=Clock.ALL)
