@@ -174,9 +174,9 @@ class Controller:
         """
         Restart Computer at 2am every day.
         """
-        if (local_time.tm_hour == 19 and local_time.tm_min == 40) or force:
+        if (local_time.tm_hour == 2 and local_time.tm_min == 0) or force:
             self.destroy()
-            os.system("init 6")  # "shutdown /r /t 1")
+            os.system("sudo init 6")
 
 
 def get_cpu_temp() -> float:

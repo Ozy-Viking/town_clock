@@ -3,8 +3,10 @@ import time  # type: ignore
 from datetime import datetime  # type: ignore
 from multiprocessing import Queue, Event
 from typing import Any, Optional  # type: ignore
-import board  # type: ignore
-import adafruit_character_lcd.character_lcd_rgb_i2c as character_lcd  # type: ignore
+import os
+if os.name == 'posix':
+    import board  # type: ignore
+    import adafruit_character_lcd.character_lcd_rgb_i2c as character_lcd  # type: ignore
 
 from Town_Clock import *
 

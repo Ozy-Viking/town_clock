@@ -1,5 +1,8 @@
 import time
-import RPi.GPIO as GPIO
+import os
+
+if os.name == "posix":
+    import RPi.GPIO as GPIO
 
 from Town_Clock import *
 

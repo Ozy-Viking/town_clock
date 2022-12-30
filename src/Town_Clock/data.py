@@ -4,6 +4,7 @@ import datetime  # type: ignore
 import glob  # type: ignore
 from typing import Optional  # type: ignore
 from pandas import read_csv  # type: ignore
+from pandas.errors import EmptyDataError
 from dataclasses import dataclass, field  # type: ignore
 
 # from numpy import nan
@@ -151,7 +152,7 @@ class ClockTime:
         pulse_log = "*pulse.log"
         full_path = os.path.join(folder_path, pulse_log)
         path = glob.glob(full_path)
-        if not path:
+        if not path or len(path) == 0:
             self.logger.log("error", "FAILED to get full path")
             self.logger.log("error", f"{path}")
         self.logger.log("debug", f"{path}")
@@ -174,10 +175,14 @@ class ClockTime:
                     self.logger.log("debug", f"Time from file: {ct}")
                     return ct
             raise NoValidTimeFromFileError("No valid time in last 3 logs.")
-
-        except NoValidTimeFromFileError as e:
+        except EmptyDataError as error:
             self.logger.logger.error("Failed to access time from csv.")
-            self.logger.logger.error(e)
+            self.logger.logger.error(error)
+            tm = self.mod_freq(time.time())
+            return [tm, tm]
+        except NoValidTimeFromFileError as error:
+            self.logger.logger.error("Failed to access time from csv.")
+            self.logger.logger.error(error)
             tm = self.mod_freq(time.time())
             return [tm, tm]
 

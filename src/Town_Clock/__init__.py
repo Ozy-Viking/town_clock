@@ -26,7 +26,7 @@ from Town_Clock.location_sunrise_sunset import   (
 
 __all__ += ["find_sunrise_sunset_times", "timezone_finder"]
 
-from Town_Clock.logging import  Worker, Listener, LOG_QUEUE, Setup_Log
+from Town_Clock.logging import  Worker, Listener, LOG_QUEUE, Setup_Log # type: ignore
 
 __all__ += [
     "Worker",
