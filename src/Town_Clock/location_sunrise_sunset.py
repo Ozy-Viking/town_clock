@@ -1,47 +1,50 @@
 import time
-import datetime as dt
+import datetime as dt  # type: ignore
+from typing import Any  # type: ignore
 from pytz import timezone
-from skyfield import almanac
-from skyfield.api import wgs84, load
+from skyfield import almanac  # type: ignore
+from skyfield.api import wgs84, load, Loader  # type: ignore
 from timezonefinder import TimezoneFinder
 
 
-def timezone_finder(latitude, longitude, altitude) -> dt.tzinfo:
+def timezone_finder(latitude: float, longitude: float, altitude: float) -> dt.tzinfo:
     tf = TimezoneFinder()
     tz = tf.timezone_at(lng=longitude, lat=latitude)
-    return timezone(tz)
+    return timezone(tz)  # type: ignore
 
 
-def find_sunrise_sunset_times(latitude, longitude, altitude) -> dict:
+def find_sunrise_sunset_times(
+    latitude: float, longitude: float, altitude: float
+) -> dict[int, float]:
     # Setting up Times
     zone = timezone_finder(latitude, longitude, altitude)
-    now = zone.localize(dt.datetime.now())
-    midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)
-    midday = now.replace(hour=12, minute=0, second=0, microsecond=0)
-    next_midday = midday + dt.timedelta(days=1)
-    ts = load.timescale()
-    t0 = ts.from_datetime(midnight)
-    t1 = ts.from_datetime(next_midday)
+    now = zone.localize(dt.datetime.now())  # type: ignore
+    midnight: Any = now.replace(hour=0, minute=0, second=0, microsecond=0)  # type: ignore
+    midday: Any = now.replace(hour=12, minute=0, second=0, microsecond=0)  # type: ignore
+    next_midday: Any = midday + dt.timedelta(days=1)
+    ts = load.timescale()  # type: ignore
+    t0 = ts.from_datetime(midnight)  # type: ignore
+    t1 = ts.from_datetime(next_midday)  # type: ignore
 
     # Setting up Position and Function
-    eph = load('de421.bsp')
-    position = wgs84.latlon(latitude_degrees=latitude,
-                            longitude_degrees=longitude,
-                            elevation_m=altitude)
-    f = almanac.dark_twilight_day(eph, position)
-    times, events = almanac.find_discrete(t0, t1, f)
+    eph: Loader = load("de421.bsp")  # type: ignore
+    position = wgs84.latlon(  # type: ignore
+        latitude_degrees=latitude, longitude_degrees=longitude, elevation_m=altitude
+    )
+    f = almanac.dark_twilight_day(eph, position)  # type: ignore
+    times, events = almanac.find_discrete(t0, t1, f)  # type: ignore
 
     # Running Function
     sunset_sunrise_times = {}
-    previous_e = f(t0).item()
-    idx = 0
-    for t, e in zip(times, events):
+    previous_e = f(t0).item()  # type: ignore
+    idx: int = 0
+    for t, e in zip(times, events):  # type: ignore
         if e in [3, 4]:
             idx += 1
-            sunset_sunrise_times[idx] = time.mktime(t.astimezone(zone).timetuple())
+            sunset_sunrise_times[idx] = time.mktime(t.astimezone(zone).timetuple())  # type: ignore
 
-    return sunset_sunrise_times
+    return sunset_sunrise_times  # type: ignore
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

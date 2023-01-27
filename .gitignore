@@ -35,7 +35,7 @@ MANIFEST
 .idea
 
 # Logs
-*.log*
+*.log.*
 
 # Installer logs
 pip-log.txt
